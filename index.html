@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>防災情報ポータル - ソナエール・ライブ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        html, body, div, span, applet, object, iframe, h1, h2, h3, h4, h5, h6, p, blockquote, pre, a, abbr, acronym, address, big, cite, code, del, dfn, em, img, ins, kbd, q, s, samp, small, strike, strong, sub, sup, tt, var, b, u, i, center, dl, dt, dd, ol, ul, li, fieldset, form, label, legend, table, caption, tbody, tfoot, thead, tr, th, td, article, aside, canvas, details, embed, figure, figcaption, footer, header, hgroup, menu, nav, output, ruby, section, summary, time, mark, audio, video, button, input {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #0f172a;
+            color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #1e293b; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: #475569; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+        .intensity-7 { background-color: #4a044e; color: #ffffff; }
+        .intensity-6plus { background-color: #991b1b; color: #ffffff; }
+        .intensity-6minus { background-color: #dc2626; color: #ffffff; }
+        .intensity-5plus { background-color: #d97706; color: #ffffff; }
+        .intensity-5minus { background-color: #eab308; color: #0f172a; }
+        .intensity-4 { background-color: #059669; color: #ffffff; }
+        .intensity-3 { background-color: #2563eb; color: #ffffff; }
+        .intensity-2 { background-color: #0ea5e9; color: #0f172a; }
+        .intensity-1 { background-color: #64748b; color: #ffffff; }
+        .intensity-unknown { background-color: #334155; color: #94a3b8; }
+        
+        .dark-surface { background-color: #1e293b; border-color: #334155; }
+    </style>
+</head>
+<body class="antialiased">
+
+    <div id="networkStatusBanner" class="fixed top-0 left-0 w-full py-2 text-center text-sm font-bold text-white z-[100] transition-transform duration-300 -translate-y-full shadow-md"></div>
+
+    <header class="bg-slate-800 border-b border-slate-700 flex-shrink-0 z-40 shadow-md">
+        <div class="max-w-[1600px] mx-auto px-4 py-3 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-red-600 via-rose-500 to-amber-500 flex items-center justify-center shadow-lg border border-white/20 shrink-0">
+                    <svg class="w-6 h-6 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 10l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <path d="M9 22V12h6v10"></path>
+                        <path d="M2 11h20"></path>
+                    </svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <h1 class="text-lg md:text-xl font-black tracking-tight text-white truncate">ソナエール</h1>
+                        <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-red-600 text-white tracking-wider border border-red-400 shadow-sm animate-pulse shrink-0">LIVE</span>
+                        <button onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0" title="アップデート履歴を確認">v3.0</button>
+                    </div>
+                    <div id="realtimeClock" class="text-[10px] md:text-xs font-mono font-bold text-emerald-400 tracking-widest mt-0.5">----/--/-- --:--:--</div>
+                </div>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="autoUpdateIndicator" class="text-[10px] text-emerald-400 border border-emerald-500/50 bg-emerald-500/10 px-2 py-1 rounded animate-pulse hidden md:inline-block shrink-0">自動更新ON (15秒)</span>
+                <button onclick="readAloud()" class="bg-slate-700 hover:bg-slate-600 border border-slate-600 text-slate-200 px-2.5 py-1.5 md:px-3 md:py-1.5 rounded-lg text-xs md:text-sm font-bold transition flex items-center gap-2 shadow shrink-0">
+                    🔊 音声読上
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-[1600px] mx-auto w-full flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-0 lg:gap-6 overflow-y-auto lg:overflow-hidden p-2 lg:p-4">
+
+        <div id="detailsSection" class="w-full lg:col-span-8 order-1 lg:order-none lg:overflow-y-auto lg:pr-2 pb-4 lg:pb-0 space-y-4">
+            
+            <!-- 地震概要セクション -->
+            <section class="dark-surface rounded-xl border p-4 shadow-lg relative">
+                
+                <div id="eewFalseAlarmBanner" class="hidden mb-4 bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-3 flex items-start gap-3 shadow-sm">
+                    <svg class="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    <p id="eewFalseAlarmText" class="text-sm font-bold text-yellow-300 leading-relaxed"></p>
+                </div>
+
+                <div class="border-b border-slate-700 pb-3 mb-4 flex justify-between items-start">
+                    <div class="max-w-[70%]">
+                        <div class="flex flex-wrap items-center gap-2 mb-1">
+                            <span id="detailTypeBadge" class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">最新地震</span>
+                            <span id="aftershockBadge" class="hidden text-[10px] font-extrabold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30">【前震 / 余震】</span>
+                            <span id="detailDate" class="text-xs md:text-sm text-slate-300 font-medium">データ取得中...</span>
+                        </div>
+                        <h2 id="detailLocation" class="text-xl md:text-3xl font-black text-white tracking-tight mt-1 leading-snug">---</h2>
+                    </div>
+                    <div class="text-right flex-shrink-0">
+                        <span class="text-[10px] md:text-xs text-slate-400 font-semibold block mb-1">最大震度</span>
+                        <div id="detailIntensity" class="inline-flex items-center justify-center font-black text-xl md:text-3xl px-4 py-2 rounded-lg shadow-md border border-slate-500/40 intensity-unknown min-w-[80px]">-</div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 text-sm bg-slate-900/80 p-3 lg:p-4 rounded-lg border border-slate-700/80 mb-2">
+                    <div>
+                        <span class="text-[10px] md:text-xs text-slate-400 font-bold block mb-1">マグニチュード</span>
+                        <span id="detailMagnitude" class="font-extrabold text-amber-400 text-lg md:text-xl">-.-</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] md:text-xs text-slate-400 font-bold block mb-1">震源の深さ</span>
+                        <span id="detailDepth" class="font-semibold text-slate-200 text-base md:text-lg">---</span>
+                    </div>
+                    <div class="col-span-2 sm:col-span-1">
+                        <span class="text-[10px] md:text-xs text-slate-400 font-bold block mb-1">震源位置 (緯度/経度)</span>
+                        <span id="detailCoords" class="font-semibold text-sky-300 text-xs md:text-sm leading-snug block">---</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] md:text-xs text-slate-400 font-bold block mb-1">緊急地震速報</span>
+                        <span id="detailEew" class="font-bold text-xs md:text-sm leading-snug block">---</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] md:text-xs text-slate-400 font-bold block mb-1">津波情報</span>
+                        <span id="detailTsunami" class="font-semibold text-slate-200 text-xs md:text-sm leading-snug block">---</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 各地の観測震度セクション -->
+            <section class="dark-surface rounded-xl border shadow-lg flex flex-col flex-1">
+                <div class="p-3 border-b border-slate-700 bg-slate-800/50 rounded-t-xl">
+                    <h3 class="font-bold text-slate-200 text-sm md:text-base">各地の観測震度 (市町村・区別一覧)</h3>
+                </div>
+                <div class="overflow-x-auto w-full p-2">
+                    <table class="w-full text-left border-collapse text-sm bg-slate-900/50 min-w-[400px]">
+                        <thead>
+                            <tr class="bg-slate-900 text-slate-400 font-bold border-b border-slate-700 text-xs">
+                                <th class="p-2 w-16 md:w-20 border-r border-slate-700 text-center whitespace-nowrap">震度</th>
+                                <th class="p-2 w-20 md:w-28 border-r border-slate-700 whitespace-nowrap">都道府県</th>
+                                <th class="p-2">観測市町村・区</th>
+                            </tr>
+                        </thead>
+                        <tbody id="intensityTableBody">
+                            <tr><td colspan="3" class="p-8 text-center text-slate-500 text-xs">データを読み込んでいます...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- 右カラム：地震リスト（最新／過去のタブ切り替え対応） -->
+        <div class="w-full lg:col-span-4 order-2 lg:order-none flex flex-col mt-4 lg:mt-0 lg:h-full lg:overflow-hidden pb-4">
+            <section class="dark-surface rounded-xl border p-3 md:p-4 shadow-lg flex flex-col h-full max-h-[50vh] lg:max-h-full">
+                
+                <!-- 最新地震 ＆ 過去の大地震 切替タブ -->
+                <div class="grid grid-cols-2 gap-1.5 p-1 bg-slate-900 rounded-lg mb-3 border border-slate-700 shrink-0">
+                    <button id="tabListRealtime" onclick="switchListMode('realtime')" class="py-1.5 text-xs font-black rounded-md transition flex items-center justify-center gap-1.5 bg-emerald-600 text-white shadow">
+                        <span>📡</span> 最新地震
+                    </button>
+                    <button id="tabListHistorical" onclick="switchListMode('historical')" class="py-1.5 text-xs font-bold rounded-md transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800">
+                        <span>🏛️</span> 過去の大地震
+                    </button>
+                </div>
+
+                <div class="mb-3 flex-shrink-0">
+                    <input type="text" id="searchInput" oninput="filterList()" placeholder="地震を検索..." class="w-full text-sm bg-slate-900 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 placeholder-slate-500 focus:outline-none focus:border-emerald-500 transition-colors shadow-inner">
+                </div>
+
+                <div class="flex items-center justify-between border-b border-slate-700 pb-2 mb-2 flex-shrink-0">
+                    <h3 id="listTitle" class="font-bold text-slate-200 text-xs md:text-sm">最新地震情報</h3>
+                    <span id="listCount" class="text-[10px] font-bold px-2 py-0.5 rounded bg-slate-700 text-slate-300">0件</span>
+                </div>
+
+                <div id="earthquakeList" class="flex-1 overflow-y-auto pr-1 space-y-1.5 scroll-smooth">
+                    <div class="text-center text-slate-500 text-xs mt-10">読み込み中...</div>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <footer class="bg-slate-800 border-t border-slate-700 py-3 w-full flex-shrink-0">
+        <div class="max-w-[1600px] mx-auto px-4 flex justify-center items-center gap-4 text-xs font-bold flex-wrap">
+            <button onclick="openModal('guide')" class="text-slate-400 hover:text-white transition underline decoration-slate-600 underline-offset-4">利用規約・ガイドライン・情報取得元</button>
+            <span class="text-slate-600">|</span>
+            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">
+                <span>✨</span> アップデート履歴 (v3.0)
+            </button>
+        </div>
+    </footer>
+
+    <!-- 利用規約＆アップデート履歴モーダル -->
+    <div id="infoModal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-slate-800 border border-slate-600 rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden relative">
+            <div class="p-3 md:p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900">
+                <div class="flex items-center gap-4">
+                    <button id="tabBtnGuide" onclick="switchModalTab('guide')" class="pb-1 text-xs md:text-sm font-bold border-b-2 border-emerald-400 text-emerald-400 flex items-center gap-1.5 transition">
+                        <span>🛡️</span> 利用規約・ガイドライン
+                    </button>
+                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs md:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">
+                        <span>✨</span> アップデート履歴 (v3.0)
+                    </button>
+                </div>
+                <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1 text-sm font-bold">✕ 閉じる</button>
+            </div>
+            
+            <div class="p-5 md:p-6 overflow-y-auto space-y-6 text-xs md:text-sm text-slate-300 leading-relaxed">
+                <!-- タブ1: 利用規約・ガイドライン -->
+                <div id="modalContentGuide" class="space-y-6">
+                    <section class="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
+                        <h3 class="font-bold text-emerald-400 mb-2 flex items-center gap-1.5 text-sm md:text-base">
+                            <span>📡</span> 1. 情報取得元および技術仕様
+                        </h3>
+                        <ul class="space-y-1.5 list-disc list-inside text-slate-300">
+                            <li><strong class="text-white">最新地震データ：</strong> 気象庁が発表する電文に基づき、「P2P地震情報 JSON API（p2pquake.net API v2 / code:551 地震情報）」より自動取得しています。</li>
+                            <li><strong class="text-white">遠地地震の自動判別：</strong> 海外等で発生した遠地地震（国内で強い揺れが予想されない地震）を自動検知し、緊急地震速報の誤判定を防止して「遠地地震」と明記します。</li>
+                            <li><strong class="text-white">リスト切り替え機能：</strong> 最新のリアルタイム地震（30件）と、過去の歴史的大地震アーカイブを独立したタブでいつでも切り替えて閲覧可能です。</li>
+                            <li><strong class="text-white">新着地震の自動表示：</strong> 閲覧中に新しい地震が発生した際は、自動的に「最新地震」タブに切り替わり、最新情報が表示されます。</li>
+                            <li><strong class="text-white">数値の自動精査・更新機能：</strong> 地震発生直後の速報値から、気象庁が後から詳細な深さ・マグニチュードを再計算（精査）した場合、15秒ごとの自動通信により自動で最新の詳細値に書き換わります。</li>
+                            <li><strong class="text-white">緊急地震速報の区分判定：</strong> 気象庁の発表基準に基づき、最大予測震度5弱以上を「緊急地震速報【警報】」、最大予測震度3以上またはM3.5以上を「緊急地震速報【予報】」として表示・判定しています。</li>
+                            <li><strong class="text-white">過去地震アーカイブ：</strong> 気象庁「震度データベース検索」および公式報告資料に基づき独自編纂しています。</li>
+                            <li><strong class="text-white">観測震度の表示基準：</strong> 気象庁および報道機関（NHK等）の公表基準に準拠し、各市区町村内で観測された【最大震度】の階級に集約・表示しています。</li>
+                        </ul>
+                    </section>
+
+                    <section class="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
+                        <h3 class="font-bold text-amber-400 mb-2 flex items-center gap-1.5 text-sm md:text-base">
+                            <span>⚠️</span> 2. 防災行動ガイドライン（命を守るための原則）
+                        </h3>
+                        <div class="space-y-2 text-slate-300">
+                            <p class="font-bold text-rose-300">
+                                【最重要】強い揺れを感じた際や緊急地震速報を受信した際は、本画面の閲覧よりも直ちに身の安全の確保を最優先してください。
+                            </p>
+                            <ul class="space-y-1.5 list-disc list-inside">
+                                <li><strong>屋内：</strong> 頭部を保護し、丈夫な机の下に身を隠すなど落下物から身を守ってください。</li>
+                                <li><strong>沿岸部・河口付近：</strong> 津波警報・注意報が発表された場合、また揺れが小さくても長くゆっくりした揺れを感じた場合は、直ちに海から離れ、高台や頑丈な津波避難ビルへ避難してください。</li>
+                            </ul>
+                        </div>
+                    </section>
+
+                    <section class="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
+                        <h3 class="font-bold text-sky-400 mb-2 flex items-center gap-1.5 text-sm md:text-base">
+                            <span>⚖️</span> 3. 利用規約および免責事項
+                        </h3>
+                        <ul class="space-y-1.5 list-disc list-inside text-slate-300">
+                            <li>当サイトは個人開発による非公式の防災啓発・情報支援ポータルです。気象業務法に基づく予報業務許可事業者ではありません。</li>
+                            <li>インターネット回線の混雑、APIサーバーの一時的な障害、端末の通信状態等により、情報の遅延や欠落、表示の不整合が生じる場合があります。</li>
+                        </ul>
+                    </section>
+                </div>
+
+                <!-- タブ2: アップデート履歴 -->
+                <div id="modalContentChange" class="hidden space-y-4">
+                    <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs md:text-sm font-black text-emerald-400 flex items-center gap-1.5">
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v3.0</span>
+                                遠地地震（海外地震）自動判別 ＆ 緊急地震速報表示の適正化
+                            </span>
+                            <span class="text-[10px] text-slate-400 font-mono">最新リリース</span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li><strong>遠地地震の自動判別：</strong> 海外で発生した大規模地震について、緊急地震速報の欄に「遠地地震」と明記し、予報との誤判定を防止しました。</li>
+                            <li><strong>2022年3月16日 福島県沖地震（本震・前震）追加：</strong> 東北新幹線脱線等をもたらした「2022年3月16日 23:36 福島県沖（M7.4 最大震度6強）」の本震、および約2分前の「23:34 福島県沖（M6.1 最大震度5弱）」の前震の気象庁公式記録を網羅しました。</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs md:text-sm font-black text-white flex items-center gap-1.5">
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-slate-600">v2.8</span>
+                                「最新地震」と「過去の大地震」の完全分離タブ切替
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li><strong>リスト切り替えタブを新設：</strong> リスト上部に「📡 最新地震」と「🏛️ 過去の大地震」の専用タブを設置し、見たい地震をワンタップで切り替えられるようにしました。</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs md:text-sm font-black text-white flex items-center gap-1.5">
+                                <span class="bg-slate-700 text-slate-300 px-2 py-0.5 rounded border border-slate-600">v2.5</span>
+                                最新地震の自動強制フォーカス ＆ 精査値リアルタイム追従
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li><strong>新着地震の自動選択・画面フォーカス：</strong> 新しい地震情報が入った瞬間に画面が自動で最新の地震情報へ切り替わる機能を追加しました。</li>
+                            <li><strong>深さ・マグニチュード精査の自動更新：</strong> 気象庁が後から詳細な深さ・Mを精査して更新した場合に、画面の数値がリアルタイムに自動で書き換わる仕組みを実装しました。</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="p-3 md:p-4 border-t border-slate-700 bg-slate-900 flex justify-between items-center">
+                <span class="text-[10px] text-slate-500">ソナエール・ライブ 防災運営ガイドライン</span>
+                <button onclick="closeModal()" class="bg-emerald-600 hover:bg-emerald-500 border border-emerald-400 text-white px-5 py-1.5 rounded-lg font-bold transition text-xs shadow-md">
+                    閉じる
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SCALE_MAP = {
+            70: { label: "震度7", cls: "intensity-7" },
+            60: { label: "震度6強", cls: "intensity-6plus" },
+            55: { label: "震度6弱", cls: "intensity-6minus" },
+            50: { label: "震度5強", cls: "intensity-5plus" },
+            45: { label: "震度5弱", cls: "intensity-5minus" },
+            40: { label: "震度4", cls: "intensity-4" },
+            30: { label: "震度3", cls: "intensity-3" },
+            20: { label: "震度2", cls: "intensity-2" },
+            10: { label: "震度1", cls: "intensity-1" }
+        };
+
+        const rawCompactArchive = [
+            // 2024 能登半島地震
+            { id: "h-2024-noto", t: "2024/01/01 16:10", loc: "令和6年能登半島地震", m: "M7.6", d: "16km", coords: "北緯37.5° / 東経137.2°", eew: "緊急地震速報【警報】", tsu: "大津波警報発表", max: 70, sub: "【本震】", pts: { 70: {"石川県": "志賀町 輪島市"}, 60: {"石川県": "七尾市 珠洲市 穴水町 能登町"}, 55: {"石川県": "中能登町", "新潟県": "長岡市 上越市", "富山県": "富山市 高岡市 氷見市"}, 50: {"石川県": "金沢市 小松市 かほく市 白山市", "新潟県": "新潟市中央区 三条市 燕市", "富山県": "滑川市 黒部市 砺波市", "福井県": "福井市 あわら市 坂井市"}, 45: {"新潟県": "新潟市西区 阿賀野市 胎内市", "富山県": "入善町", "石川県": "加賀市 野々市市", "福井県": "大野市 鯖江市 越前市", "長野県": "長野市 諏訪市", "岐阜県": "高山市"}, 40: {"青森県": "階上町", "山形県": "酒田市 鶴岡市", "福島県": "会津若松市", "茨城県": "水戸市 土浦市", "栃木県": "宇都宮市", "群馬県": "前橋市 高崎市", "埼玉県": "さいたま市西区 熊谷市", "千葉県": "千葉市中央区", "東京都": "千代田区 新宿区", "神奈川県": "横浜市中区", "新潟県": "阿賀町", "福井県": "敦賀市 小浜市", "山梨県": "甲府市", "長野県": "松本市 上田市", "岐阜県": "岐阜市 大垣市", "静岡県": "静岡市葵区 浜松市中央区", "愛知県": "名古屋市中区 豊橋市", "三重県": "津市 四日市市", "滋賀県": "大津市 彦根市", "京都府": "京都市中京区", "大阪府": "大阪市北区 大東市", "兵庫県": "豊岡市"}, 30: {"北海道": "函館市", "青森県": "青森市", "岩手県": "盛岡市", "宮城県": "仙台市青葉区", "秋田県": "秋田市", "山形県": "山形市", "福島県": "福島市", "東京都": "渋谷区", "神奈川県": "横須賀市", "愛知県": "瀬戸市", "奈良県": "奈良市", "和歌山県": "和歌山市", "鳥取県": "鳥取市", "島根県": "松江市", "岡山市": "北区", "広島県": "広島市中区"}, 20: {"北海道": "札幌市北区", "秋田県": "能代市", "埼玉県": "所沢市", "千葉県": "市川市", "愛知県": "豊田市", "兵庫県": "姫路市", "徳島県": "徳島市", "香川県": "高松市", "愛媛県": "松山市", "高知県": "高知市", "福岡県": "福岡市中央区"}, 10: {"北海道": "旭川市", "宮城県": "気仙沼市", "山口県": "下関市 山口市", "徳島県": "鳴門市", "福岡県": "久留米市 八女市", "佐賀県": "佐賀市 唐津市", "長崎県": "長崎市", "熊本県": "熊本市中央区 八代市"} } },
+            { id: "h-2024-noto-pre", t: "2024/01/01 16:06", loc: "能登半島沖", m: "M5.5", d: "10km", coords: "北緯37.5° / 東経137.3°", eew: "緊急地震速報【警報】", tsu: "津波なし", max: 50, sub: "【前震】", pts: { 50: {"石川県": "珠洲市"}, 45: {"石川県": "輪島市 能登町"}, 40: {"石川県": "七尾市 穴水町"}, 30: {"石川県": "中能登町 志賀町", "新潟県": "上越市", "富山県": "高岡市 氷見市"}, 20: {"石川県": "金沢市 小松市 かほく市 白山市", "新潟県": "新潟市中央区 長岡市", "富山県": "富山市 滑川市 黒部市 砺波市", "福井県": "福井市 あわら市 坂井市"}, 10: {"新潟県": "三条市 燕市", "長野県": "長野市 諏訪市", "岐阜県": "高山市", "群馬県": "前橋市"} } },
+            { id: "h-2024-noto-aft1", t: "2024/01/01 16:18", loc: "能登半島沖", m: "M6.1", d: "10km", coords: "北緯37.5° / 東経137.3°", eew: "緊急地震速報【警報】", tsu: "津波なし", max: 50, sub: "【余震】", pts: { 50: {"石川県": "七尾市 輪島市 穴水町"}, 45: {"石川県": "珠洲市 中能登町 能登町"}, 40: {"石川県": "志賀町 金沢市 かほく市", "新潟県": "上越市", "富山県": "高岡市 氷見市"}, 30: {"石川県": "小松市 白山市 野々市市", "新潟県": "新潟市中央区 長岡市 三条市 燕市", "富山県": "富山市 滑川市 黒部市 砺波市", "福井県": "福井市 あわら市 坂井市"}, 20: {"新潟県": "阿賀野市 胎内市", "福井県": "大野市 鯖江市 越前市", "長野県": "長野市", "岐阜県": "高山市"}, 10: {"山形県": "酒田市", "福島県": "会津若松市", "栃木県": "宇都宮市", "群馬県": "前橋市", "埼玉県": "熊谷市", "東京都": "千代田区", "愛知県": "名古屋市中区", "滋賀県": "大津市"} } },
+            { id: "h-2024-noto-aft2", t: "2024/01/06 23:20", loc: "能登半島沖", m: "M4.4", d: "5km", coords: "北緯37.2° / 東経136.6°", eew: "緊急地震速報【予報】", tsu: "津波なし", max: 55, sub: "【余震】", pts: { 55: { "石川県": "志賀町" }, 30: { "石川県": "七尾市 輪島市 中能登町" }, 20: { "石川県": "羽咋市 宝達志水町", "富山県": "富山市 小矢部市" }, 10: { "石川県": "加賀市 かほく市 能美市 津幡町 能登町", "富山県": "高岡市 氷見市 南砺市 射水市 舟橋村 立山町", "福井県": "あわら市", "岐阜県": "高山市 飛騨市 白川村" } } },
+
+            // 2022年3月16日 福島県沖地震 本震（M7.4 最大震度6強）
+            {
+                id: "h-2022-fukushima",
+                t: "2022/03/16 23:36",
+                loc: "福島県沖",
+                m: "M7.4",
+                d: "57km",
+                coords: "北緯37.7° / 東経141.6°",
+                eew: "緊急地震速報【警報】",
+                tsu: "津波注意報発表",
+                max: 60,
+                sub: "【本震】",
+                pts: {
+                    60: { "宮城県": "登米市 蔵王町", "福島県": "相馬市 南相馬市 国見町" },
+                    55: { "宮城県": "石巻市 名取市 角田市 岩沼市 栗原市 東松島市 大崎市 大河原町 宮城川崎町 亘理町 山元町 涌谷町", "福島県": "福島市 二本松市 田村市 福島伊達市 桑折町 天栄村 楢葉町 富岡町 大熊町 双葉町 浪江町 新地町 飯舘村" },
+                    50: { "岩手県": "一関市 奥州市 矢巾町", "宮城県": "仙台市青葉区 仙台市宮城野区 仙台市若林区 仙台市太白区 仙台市泉区 塩竈市 白石市 多賀城市 富谷市 村田町 柴田町 丸森町 松島町 七ヶ浜町 利府町 大和町 大郷町 大衡村 色麻町 宮城加美町 宮城美里町 女川町", "山形県": "中山町", "福島県": "郡山市 いわき市 白河市 須賀川市 本宮市 川俣町 大玉村 鏡石町 泉崎村 中島村 矢吹町 棚倉町 玉川村 浅川町 古殿町 福島広野町 川内村 葛尾村" },
+                    45: { "青森県": "おいらせ町 階上町", "岩手県": "盛岡市 大船渡市 花巻市 北上市 遠野市 釜石市 金ケ崎町 平泉町 住田町 普代村 野田村", "宮城県": "気仙沼市 七ヶ宿町 南三陸町", "秋田県": "横手市 大仙市", "山形県": "米沢市 酒田市 上山市 天童市 山辺町 河北町 最上町 高畠町 山形川西町 白鷹町", "福島県": "猪苗代町 会津美里町 矢祭町 石川町 平田村 三春町 小野町", "茨城県": "水戸市 日立市 土浦市 常陸太田市 北茨城市 笠間市 ひたちなか市 常陸大宮市 那珂市 筑西市 小美玉市 茨城町 城里町 東海村 大子町", "栃木県": "市貝町 高根沢町 那須町 栃木那珂川町", "新潟県": "南魚沼市" },
+                    40: { "青森県": "八戸市 十和田市 三沢市", "岩手県": "二戸市 八幡平市 滝沢市", "秋田県": "秋田市 能代市 湯沢市 由利本荘市", "山形県": "山形市 鶴岡市 新庄市", "福島県": "会津若松市 喜多方市", "茨城県": "古河市 結城市 龍ケ崎市 つくば市 取手市 牛久市 かすみがうら市 桜川市 行方市 坂東市 稲敷市 つくばみらい市", "栃木県": "宇都宮市 足利市 栃木市 佐野市 鹿沼市 小山市 真岡市 大田原市 矢板市 さくら市 那須烏山市 下野市 益子町 壬生町 野木町 塩谷町", "群馬県": "前橋市 高崎市 桐生市 伊勢崎市 太田市 館林市 渋川市 板倉町 千代田町 大泉町 邑楽町", "埼玉県": "さいたま市大宮区 さいたま市浦和区 川越市 熊谷市 川口市 行田市 加須市 春日部市 羽生市 鴻巣市 深谷市 上尾市 草加市 越谷市 戸田市 志木市 桶川市 久喜市 北本市 八潮市 富士見市 三郷市 蓮田市 幸手市 吉川市 白岡市", "千葉県": "千葉市花見川区 銚子市 市川市 船橋市 松戸市 野田市 成田市 佐倉市 習志野市 柏市 流山市 八千代市 我孫子市 鎌ケ谷市 浦安市 印西市 白井市 香取市", "東京都": "千代田区 中央区 港区 新宿区 文京区 江東区 品川区 目黒区 大田区 世田谷区 渋谷区 中野区 杉並区 豊島区 北区 荒川区 板橋区 練馬区 足立区 葛飾区 江戸川区 調布市 町田市 小平市 日野市 東村山市 国分寺市 西東京市", "神奈川県": "横浜市鶴見区 横浜市神奈川区 横浜市西区 横浜市中区 横浜市港北区 横浜市戸塚区 横浜市緑区 横浜市青葉区 横浜市都筑区 川崎市川崎区 川崎市中原区 川崎市宮前区 平塚市 藤沢市 茅ヶ崎市 海老名市", "新潟県": "新潟市中央区 新潟市江南区 新発田市 村上市 燕市 五泉市 阿賀野市 胎内市", "山梨県": "甲府市", "長野県": "諏訪市 茅野市", "静岡県": "熱海市 富士市" },
+                    30: { "北海道": "函館市 釧路市 帯広市 苫小牧市 江別市", "群馬県": "沼田市 安中市 富岡市", "神奈川県": "相模原市 横須賀市 小田原市 厚木市", "山梨県": "富士吉田市 大月市", "長野県": "長野市 松本市 上田市", "岐阜県": "高山市 岐阜市 中津川市", "静岡県": "静岡市葵区 沼津市 三島市 浜松市中央区", "愛知県": "名古屋市中区 豊橋市 豊田市 一宮市", "三重県": "津市 四日市市", "滋賀県": "大津市 彦根市", "京都府": "京都市中京区", "大阪府": "大阪市北区", "兵庫県": "神戸市中央区", "奈良県": "奈良市" },
+                    20: { "北海道": "札幌市北区", "石川県": "金沢市", "福井県": "福井市", "広島県": "広島市中区", "徳島県": "徳島市", "香川県": "高松市" },
+                    10: { "鳥取県": "鳥取市", "岡山県": "岡山市北区", "愛媛県": "松山市", "高知県": "高知市", "福岡県": "福岡市中央区" }
+                }
+            },
+
+            // 2022年3月16日 福島県沖地震 前震（M6.1 最大震度5弱）
+            {
+                id: "h-2022-fukushima-pre",
+                t: "2022/03/16 23:34",
+                loc: "福島県沖",
+                m: "M6.1",
+                d: "57km",
+                coords: "北緯37.7° / 東経141.6°",
+                eew: "緊急地震速報【警報】",
+                tsu: "この地震による津波の心配はありません。",
+                max: 45,
+                sub: "【前震】",
+                pts: {
+                    45: { "宮城県": "石巻市", "福島県": "相馬市" },
+                    40: { "宮城県": "仙台市青葉区 仙台市宮城野区 仙台市若林区 仙台市泉区 白石市 名取市 角田市 岩沼市 登米市 栗原市 東松島市 大崎市 蔵王町 大河原町 村田町 柴田町 丸森町 亘理町 山元町 松島町 利府町 大郷町 大衡村 色麻町 宮城加美町 涌谷町 宮城美里町", "福島県": "福島市 郡山市 白河市 須賀川市 二本松市 田村市 福島伊達市 本宮市 桑折町 国見町 川俣町 大玉村 鏡石町 泉崎村 棚倉町 矢祭町 玉川村 浅川町 小野町 いわき市 福島広野町 楢葉町 富岡町 川内村 大熊町 双葉町 浪江町 葛尾村 新地町 飯舘村 猪苗代町" },
+                    30: { "岩手県": "盛岡市 一関市 奥州市 矢巾町", "秋田県": "横手市 大仙市", "山形県": "山形市 米沢市 天童市", "茨城県": "水戸市 日立市 笠間市 ひたちなか市 那珂市 筑西市", "栃木県": "宇都宮市 那須町" },
+                    20: { "青森県": "八戸市", "群馬県": "前橋市", "埼玉県": "さいたま市大宮区", "千葉県": "千葉市中央区", "東京都": "千代田区", "神奈川県": "横浜市中区", "新潟県": "新潟市中央区" },
+                    10: { "北海道": "函館市", "静岡県": "富士市", "愛知県": "名古屋市中区" }
+                }
+            },
+
+            // 2019 北海道胆振東部地震 最大余震（震度6弱）
+            { id: "h-2018-iburi-aft1", t: "2019/02/21 21:22", loc: "胆振地方中東部", m: "M5.8", d: "33km", coords: "北緯42.8° / 東経142.0°", eew: "緊急地震速報【警報】", tsu: "津波なし", max: 55, sub: "【余震】", pts: { 55: { "北海道": "厚真町" }, 50: { "北海道": "安平町 むかわ町" }, 45: { "北海道": "札幌市北区 札幌市手稲区 千歳市 長沼町 平取町" }, 40: { "北海道": "札幌市東区 札幌市白石区 札幌市豊平区 札幌市西区 札幌市厚別区 札幌市清田区 岩見沢市 苫小牧市 江別市 三笠市 登別市 恵庭市 北広島市 石狩市 新篠津村 南幌町 由仁町 栗山町 月形町 白老町 日高町 新冠町 新ひだか町" }, 30: { "北海道": "札幌市中央区 札幌市南区 函館市 小樽市 室蘭市 夕張市 美唄市 芦別市 胆振伊達市 当別町 鹿部町 真狩村 留寿都村 喜茂別町 倶知安町 余市町 赤井川村 奈井江町 浦臼町 中富良野町 占冠村 洞爺湖町 浦河町 鹿追町 清水町 芽室町 浦幌町", "青森県": "階上町 東通村" }, 20: { "北海道": "旭川市 帯広市 釧路市 北斗市 滝川市 砂川市 赤平市 歌志内市 深川市 富良野市 留萌市 七飯町 森町 八雲町 長万部町", "青森県": "青森市 八戸市 三沢市 野辺地町 七戸町 六戸町 横浜町 東北町 六ヶ所村 おいらせ町 五戸町 南部町 むつ市 大間町", "岩手県": "盛岡市 久慈市 野田村 軽米町" }, 10: { "北海道": "根室市 北見市", "岩手県": "二戸市 八幡平市", "宮城県": "気仙沼市 登米市" } } },
+
+            // 2018 北海道胆振東部地震 余震（震度5弱）
+            { id: "h-2018-iburi-aft2", t: "2018/09/06 06:11", loc: "胆振地方中東部", m: "M5.4", d: "35km", coords: "北緯42.7° / 東経142.1°", eew: "緊急地震速報【警報】", tsu: "津波なし", max: 45, sub: "【余震】", pts: { 45: { "北海道": "厚真町 安平町 むかわ町" }, 40: { "北海道": "千歳市 日高町 平取町 新冠町" }, 30: { "北海道": "札幌市北区 札幌市東区 札幌市白石区 札幌市清田区 苫小牧市 江別市 恵庭市 北広島市 長沼町 由仁町 栗山町 白老町 新ひだか町" }, 20: { "北海道": "札幌市中央区 札幌市豊平区 札幌市南区 札幌市西区 札幌市手稲区 札幌市厚別区 函館市 室蘭市 帯広市 岩見沢市 夕張市 三笠市 登別市 石狩市", "青森県": "八戸市 階上町 東通村" }, 10: { "北海道": "小樽市 旭川市 釧路市", "青森県": "青森市 むつ市", "岩手県": "盛岡市 二戸市" } } },
+
+            // 2018 平成30年北海道胆振東部地震 本震（震度7）
+            { id: "h-2018-iburi", t: "2018/09/06 03:07", loc: "平成30年北海道胆振東部地震", m: "M6.7", d: "37km", coords: "北緯42.7° / 東経142.0°", eew: "緊急地震速報【警報】", tsu: "津波なし", max: 70, sub: "【本震】", pts: { 70: { "北海道": "厚真町" }, 60: { "北海道": "安平町 むかわ町" }, 55: { "北海道": "札幌市東区 千歳市 日高町 平取町" }, 50: { "北海道": "札幌市北区 札幌市白石区 札幌市手稲区 札幌市清田区 苫小牧市 江別市 三笠市 恵庭市 長沼町 新冠町 新ひだか町" }, 45: { "北海道": "札幌市豊平区 札幌市西区 札幌市厚別区 函館市 室蘭市 岩見沢市 登別市 胆振伊達市 北広島市 石狩市 新篠津村 南幌町 由仁町 栗山町 白老町" }, 40: { "北海道": "札幌市中央区 札幌市南区 小樽市 旭川市 釧路市 帯広市 夕張市 留萌市 美唄市 芦別市 赤平市 滝川市 砂川市 歌志内市 深川市 富良野市 当別町 七飯町 鹿部町 森町 長万部町 上ノ国町 乙部町 せたな町 ニセコ町 真狩村 留寿都村 喜茂別町 倶知安町 余市町 赤井川村 奈井江町 月形町 浦臼町 新十津川町 妹背牛町 秩父別町 北竜町 沼田町 鷹栖町 当麻町 中富良野町 南富良野町 占冠村 剣淵町 増毛町 壮瞥町 洞爺湖町 浦河町 音更町 鹿追町 新得町 清水町 芽室町 大樹町 幕別町 池田町 浦幌町", "青森県": "青森市 八戸市 平内町 七戸町 おいらせ町 階上町" }, 30: { "北海道": "北見市 網走市 紋別市 士別市 名寄市 根室市", "青森県": "弘前市 十和田市 三沢市 むつ市 つがる市", "岩手県": "盛岡市 二戸市 八幡平市 滝沢市", "宮城県": "気仙沼市" }, 20: { "北海道": "稚内市", "青森県": "黒石市 五所川原市", "岩手県": "宮古市 大船渡市 花巻市 北上市 久慈市 遠野市 一関市 釜石市 奥州市", "宮城県": "仙台市青葉区 仙台市宮城野区 石巻市 塩竈市 白石市 名取市 角田市 登米市 栗原市 東松島市 大崎市", "秋田県": "秋田市 横手市 大館市 能代市", "山形県": "酒田市" }, 10: { "福島県": "福島市 郡山市 白河市", "秋田県": "湯沢市 仙北市" } } },
+
+            // 2016 熊本地震
+            { id: "h-2016-kuma-pre1", t: "2016/04/14 21:26", loc: "熊本県熊本地方", m: "M6.5", d: "11km", coords: "北緯32.7° / 東経130.8°", eew: "緊急地震速報【警報】", tsu: "津波なし", max: 70, sub: "【前震】", pts: { 70: {"熊本県": "益城町"}, 60: {"熊本県": "嘉島町"}, 55: {"熊本県": "熊本市東区 熊本市西区 熊本市南区 玉名市 宇城市 西原村 御船町"}, 50: {"熊本県": "熊本市中央区 熊本市北区 八代市 菊池市 宇土市 合志市 大津町 菊陽町 氷川町"}, 45: {"熊本県": "荒尾市 山鹿市 阿蘇市 熊本美里町 和水町 甲佐町", "福岡県": "久留米市 柳川市 八女市 みやま市", "佐賀県": "神埼市", "長崎県": "南島原市", "宮崎県": "椎葉村"}, 40: {"熊本県": "水俣市 人吉市 上天草市 天草市", "福岡県": "福岡市中央区 福岡市博多区 福岡市南区 大牟田市 筑後市 大川市 朝倉市", "佐賀県": "佐賀市 鳥栖市 小城市", "長崎県": "島原市 雲仙市 諫早市", "大分県": "日田市 竹田市", "宮崎県": "高千穂町 延岡市", "山口県": "下関市"}, 30: {"福岡県": "北九州市門司区 飯塚市 糸島市", "佐賀県": "唐津市 伊万里市", "長崎県": "長崎市 大村市", "大分県": "大分市 別府市 豊後大野市", "宮崎県": "宮崎市 都城市", "山口県": "宇部市 山口市", "広島県": "広島市中区 呉市", "愛媛県": "八幡浜市 西予市"}, 20: {"広島県": "福山市", "島根県": "松江市 出雲市", "岡山県": "岡山市北区 倉敷市", "愛媛県": "松山市 宇和島市", "高知県": "高知市 四万十市", "徳島県": "徳島市"}, 10: {"兵庫県": "姫路市 洲本市", "大阪府": "大阪市北区 堺市堺区", "和歌山県": "和歌山市", "香川県": "高松市 丸亀市"} } },
+            { id: "h-2016-kuma-pre2", t: "2016/04/14 22:07", loc: "熊本県熊本地方", m: "M5.7", d: "10km", coords: "北緯32.7° / 東経130.8°", eew: "緊急地震速報【警報】", tsu: "津波なし", max: 55, sub: "【前震】", pts: { 55: {"熊本県": "益城町"}, 50: {"熊本県": "熊本市東区 熊本市南区 嘉島町 御船町 宇城市"}, 45: {"熊本県": "熊本市中央区 熊本市西区 熊本市北区 宇土市 西原村 甲佐町"}, 40: {"熊本県": "八代市 玉名市 菊池市 合志市 大津町 菊陽町 氷川町"}, 30: {"熊本県": "荒尾市 山鹿市 阿蘇市 熊本美里町 和水町 上天草市", "福岡県": "久留米市 柳川市 八女市 みやま市", "佐賀県": "神埼市"}, 20: {"福岡県": "福岡市中央区 福岡市博多区 大牟田市 筑後市", "佐賀県": "佐賀市 鳥栖市 小城市", "長崎県": "南島原市 島原市 雲仙市", "大分県": "日田市 竹田市"}, 10: {"福岡県": "北九州市門司区 飯塚市", "佐賀県": "唐津市", "長崎県": "長崎市 諫早市", "大分県": "大分市 別府市", "宮崎県": "宮崎市 延岡市 高千穂町", "山口県": "下関市"} } },
+            { id: "h-2016-kuma-pre3", t: "2016/04/15 00:03", loc: "熊本県熊本地方", m: "M6.4", d: "10km", coords: "北緯32.7° / 東経130.8°", eew: "緊急地震速報【警報】", tsu: "津波なし", max: 60, sub: "【前震】", pts: { 60: {"熊本県": "宇城市"}, 55: {"熊本県": "熊本市東区 熊本市南区 益城町 嘉島町 御船町 西原村 氷川町"}, 50: {"熊本県": "熊本市中央区 熊本市西区 熊本市北区 八代市 玉名市 宇土市 合志市 大津町 菊陽町 甲佐町"}, 45: {"熊本県": "菊池市 山鹿市 荒尾市 熊本美里町 和水町 上天草市"}, 40: {"熊本県": "阿蘇市 天草市", "福岡県": "久留米市 柳川市 八女市 みやま市 筑後市 大牟田市", "佐賀県": "佐賀市 神埼市 鳥栖市 小城市", "長崎県": "南島原市 島原市 雲仙市"}, 30: {"福岡県": "福岡市中央区 福岡市博多区 福岡市南区 朝倉市", "長崎県": "諫早市 長崎市", "大分県": "日田市 竹田市 大分市", "宮崎県": "高千穂町 延岡市 椎葉村"}, 20: {"福岡県": "北九州市門司区 飯塚市 糸島市", "佐賀県": "唐津市 伊万里市", "長崎県": "大村市", "大分県": "別府市 豊後大野市", "宮崎県": "宮崎市 都城市", "山口県": "下関市 宇部市"}, 10: {"山口県": "山口市", "広島県": "広島市中区 呉市", "愛媛県": "八幡浜市 松山市", "高知県": "高知市 四万十市", "島根県": "松江市"} } },
+            { id: "h-2016-kuma", t: "2016/04/16 01:25", loc: "熊本県熊本地方", m: "M7.3", d: "12km", coords: "北緯32.8° / 東経130.8°", eew: "緊急地震速報【警報】", tsu: "津波注意報発表", max: 70, sub: "【本震】", pts: { 70: {"熊本県": "益城町 西原村"}, 60: {"熊本県": "熊本市中央区 熊本市東区 熊本市西区 熊本市南区 熊本市北区 菊陽町 宇城市 阿蘇市 嘉島町 宇土市 大津町 南阿蘇村 御船町 氷川町 合志市"}, 55: {"熊本県": "八代市 玉名市 菊池市 山鹿市 甲佐町", "大分県": "別府市 由布市"}, 50: {"熊本県": "荒尾市 水俣市 人吉市 長洲町 和水町 錦町 上天草市 天草市", "福岡県": "久留米市 柳川市 八女市 筑後市 大川市 小郡市 みやま市 大木町", "佐賀県": "佐賀市 神埼市 白石町 みやき町", "長崎県": "南島原市", "大分県": "大分市 豊後大野市 日田市 竹田市", "宮崎県": "椎葉村 高千穂町"}, 45: {"熊本県": "芦北町 津奈木町 多良木町", "福岡県": "福岡市中央区 福岡市博多区 朝倉市 糸島市", "佐賀県": "鳥栖市 多久市 鹿島市 小城市", "長崎県": "島原市 雲仙市", "大分県": "中津市 佐伯市 臼杵市 津久見市 九重町", "宮崎県": "延岡市 えびの市"}, 40: {"熊本県": "水上村 湯前町", "福岡県": "北九州市門司区 大牟田市 直方市 飯塚市 宗像市", "佐賀県": "唐津市 伊万里市 武雄市", "長崎県": "長崎市 諫早市 大村市 平戸市", "大分県": "宇佐市 国東市 杵築市", "宮崎県": "宮崎市 日南市 都城市 日向市 西都市", "山口県": "下関市 宇部市", "愛媛県": "八幡浜市 西予市"}, 30: {"福岡県": "豊前市 行橋市", "長崎県": "佐世保市", "山口県": "山口市 防府市 萩市", "広島県": "広島市中区 呉市 尾道市 福山市", "島根県": "松江市 出雲市 浜田市", "鳥取県": "鳥取市 米子市", "岡山県": "岡山市北区 倉敷市", "愛媛県": "松山市 今治市 宇和島市", "高知県": "高知市 四万十市", "徳島県": "徳島市", "香川県": "高松市 丸亀市"}, 20: {"広島県": "三原市 東広島市", "鳥取県": "倉吉市", "兵庫県": "神戸市中央区 姫路市 尼崎市", "大阪府": "大阪市北区 堺市堺区", "京都府": "京都市中京区 舞鶴市", "和歌山県": "和歌山市 田辺市", "奈良県": "奈良市", "滋賀県": "大津市", "三重県": "津市 四日市市", "愛知県": "名古屋市中区"}, 10: {"京都府": "福知山市 宇治市", "三重県": "伊勢市", "愛知県": "一宮市 豊田市", "岐阜県": "岐阜市", "静岡県": "静岡市葵区 浜松市中央区", "長野県": "長野市 松本市", "福井県": "福井市 敦賀市", "石川県": "金沢市 小松市", "富山県": "富山市", "新潟県": "新潟市中央区 長岡市", "神奈川県": "横浜市中区", "東京都": "千代田区 新宿区", "埼玉県": "さいたま市大宮区 熊谷市", "千葉県": "千葉市中央区", "群馬県": "前橋市 高崎市", "栃木県": "宇都宮市"} } },
+            { id: "h-2016-kuma-aft1", t: "2016/04/16 01:45", loc: "熊本県熊本地方", m: "M5.9", d: "10km", coords: "北緯32.7° / 東経130.8°", eew: "緊急地震速報【警報】", tsu: "津波なし", max: 55, sub: "【余震】", pts: { 55: {"熊本県": "益城町 熊本市東区 熊本市南区 宇城市 嘉島町 御船町 西原村 氷川町"}, 50: {"熊本県": "熊本市中央区 熊本市西区 熊本市北区 八代市 玉名市 宇土市 合志市 大津町 菊陽町 甲佐町"}, 45: {"熊本県": "菊池市 山鹿市 荒尾市 和水町 上天草市"}, 40: {"熊本県": "阿蘇市 天草市", "福岡県": "久留米市 柳川市 八女市 みやま市 筑後市 大牟田市", "佐賀県": "佐賀市 神埼市 鳥栖市 小城市", "長崎県": "南島原市 島原市 雲仙市"}, 30: {"福岡県": "福岡市中央区 朝倉市", "長崎県": "諫早市 長崎市", "大分県": "日田市 竹田市 大分市", "宮崎県": "高千穂町 延岡市 椎葉村"}, 20: {"福岡県": "北九州市門司区 飯塚市", "佐賀県": "唐津市", "大分県": "別府市", "宮崎県": "宮崎市 都城市", "山口県": "下関市 宇部市"}, 10: {"山口県": "山口市", "広島県": "広島市中区", "愛媛県": "八幡浜市 松山市", "高知県": "高知市"} } },
+            { id: "h-2016-kuma-aft2", t: "2016/04/16 03:55", loc: "熊本県阿蘇地方", m: "M5.8", d: "10km", coords: "北緯32.9° / 東経131.1°", eew: "緊急地震速報【警報】", tsu: "津波なし", max: 60, sub: "【余震】", pts: { 60: {"熊本県": "阿蘇市 産山村"}, 55: {"熊本県": "南阿蘇村 大津町 菊陽町 高森町"}, 50: {"熊本県": "熊本市東区 熊本市北区 益城町 西原村 菊池市 合志市 小国町 南小国町", "大分県": "竹田市"}, 45: {"熊本県": "熊本市中央区 熊本市西区 熊本市南区 宇城市 嘉島町 御船町 玉名市 山鹿市", "大分県": "由布市 日田市 九重町 玖珠町"}, 40: {"熊本県": "八代市 宇土市 甲佐町 荒尾市 和水町 上天草市", "福岡県": "久留米市 柳川市 八女市 みやま市 朝倉市", "大分県": "大分市 別府市 豊後大野市", "宮崎県": "高千穂町 椎葉村", "佐賀県": "鳥栖市 みやき町"}, 30: {"福岡県": "福岡市中央区 福岡市博多区 筑後市 大牟田市", "佐賀県": "佐賀市 神埼市 小城市", "長崎県": "島原市 雲仙市 南島原市", "宮崎県": "延岡市 宮崎市 都城市", "山口県": "下関市", "愛媛県": "八幡浜市"}, 20: {"福岡県": "北九州市門司区 飯塚市", "佐賀県": "唐津市", "長崎県": "長崎市 諫早市", "大分県": "中津市 佐伯市", "山口県": "宇部市 山口市", "広島県": "広島市中区", "愛媛県": "松山市"}, 10: {"島根県": "松江市", "鳥取県": "米子市", "岡山県": "岡山市北区", "高知県": "高知市", "兵庫県": "姫路市"} } },
+
+            // 2011 東北地方太平洋沖地震（東日本大震災）
+            { id: "h-2011-tohoku-pre", t: "2011/03/09 11:45", loc: "三陸沖", m: "M7.3", d: "8km", coords: "北緯38.3° / 東経143.3°", eew: "緊急地震速報【警報】", tsu: "津波注意報発表", max: 45, sub: "【前震】", pts: { 45: {"宮城県": "栗原市 登米市 美里町"}, 40: {"青森県": "八戸市 七戸町 おいらせ町 階上町", "岩手県": "大船渡市 釜石市 盛岡市 八幡平市 矢巾町 花巻市 北上市 遠野市 一関市 金ケ崎町 平泉町 奥州市", "宮城県": "気仙沼市 加美町 涌谷町 南三陸町 仙台市宮城野区 仙台市泉区 石巻市 塩竈市 東松島市 大崎市 松島町 利府町 大郷町 大衡村"}, 30: {"北海道": "函館市 釧路市 帯広市", "青森県": "青森市 十和田市 むつ市 つがる市 弘前市", "岩手県": "宮古市 久慈市 二戸市", "宮城県": "仙台市青葉区 仙台市若林区 仙台市太白区 白石市 名取市 角田市 岩沼市", "秋田県": "秋田市 横手市 大仙市 仙北市", "山形県": "山形市 米沢市 新庄市 酒田市 鶴岡市", "福島県": "福島市 郡山市 白河市 須賀川市 二本松市 田村市 伊達市 本宮市 相馬市 南相馬市 会津若松市 喜多方市", "茨城県": "水戸市 日立市 土浦市 石岡市 下妻市 常総市 常陸太田市 高萩市 笠間市 つくば市 ひたちなか市 筑西市 坂東市", "栃木県": "宇都宮市 足利市 栃木市 佐野市 鹿沼市 日光市 小山市 真岡市 大田原市", "群馬県": "前橋市 高崎市 桐生市 伊勢崎市 太田市 沼田市 館林市 渋川市 藤岡市", "埼玉県": "さいたま市西区 熊谷市 川口市 所沢市", "千葉県": "千葉市中央区 野田市 成田市", "東京都": "千代田区 中央区 港区 新宿区", "神奈川県": "横浜市鶴見区 川崎市川崎区", "新潟県": "新潟市中央区 長岡市", "山梨県": "甲府市", "長野県": "長野市 松本市", "静岡県": "富士市"}, 20: {"北海道": "札幌市北区 小樽市 室蘭市 網走市 苫小牧市 根室市", "東京都": "八王子市 町田市", "神奈川県": "横須賀市 藤沢市 小田原市", "新潟県": "上越市 糸魚川市", "岐阜県": "高山市", "静岡県": "静岡市葵区 浜松市中区", "愛知県": "名古屋市中区", "滋賀県": "彦根市"}, 10: {"三重県": "四日市市", "京都府": "京都市中京区", "大阪府": "大阪市北区 堺市堺区", "兵庫県": "豊岡市 尼崎市", "奈良県": "奈良市", "和歌山県": "和歌山市"} } },
+            { id: "h-2011-tohoku", t: "2011/03/11 14:46", loc: "東北地方太平洋沖地震", m: "M9.0", d: "24km", coords: "北緯38.1° / 東経142.9°", eew: "緊急地震速報【警報】", tsu: "大津波警報発表", max: 70, sub: "【本震】", pts: { 70: {"宮城県": "栗原市"}, 60: {"宮城県": "仙台市宮城野区 仙台市若林区 仙台市泉区 石巻市 塩竈市 東松島市 大崎市 名取市 角田市 岩沼市 登米市", "福島県": "白河市 須賀川市 二本松市 鏡石町 楢葉町 富岡町 大熊町 双葉町 浪江町 新地町", "茨城県": "日立市 鉾田市 高萩市 笠間市 常陸大宮市 那珂市 筑西市", "栃木県": "宇巨宮市 真岡市 大田原市 高根沢町"}, 55: {"宮城県": "仙台市青葉区 仙台市太白区 気仙沼市 白石市 多賀城市", "岩手県": "大船渡市 釜石市 宮古市 陸前高田市 奥州市 矢巾町", "福島県": "福島市 郡山市 いわき市 相馬市 田村市 南相馬市 伊達市", "茨城県": "水戸市 土浦市 結城市 龍ケ崎市 下妻市 常総市 取手市 つくば市 鹿嶋市", "栃木県": "足利市 栃木市 佐野市 鹿沼市 日光市 小山市", "千葉県": "成田市 印西市 香取市 山武市"}, 50: {"青森県": "八戸市 おいらせ町", "岩手県": "盛岡市 花巻市 北上市 遠野市 一関市", "宮城県": "女川町 南三陸町", "福島県": "会津若松市 喜多方市", "茨城県": "牛久市 守谷市 坂東市", "栃木県": "矢板市 さくら市 那須烏山市", "群馬県": "前橋市 高崎市 桐生市 伊勢崎市 太田市 館林市 渋川市", "埼玉県": "さいたま市西区 さいたま市北区 さいたま市大宮区 川口市 熊谷市 行田市 秩父市", "千葉県": "千葉市中央区 千葉市花見川区 銚子市 市川市 船橋市 松戸市 野田市 茂原市 東金市", "東京都": "千代田区 中央区 港区 新宿区 文京区 台東区 墨田区 江東区 品川区 目黒区 大田区 世田谷区 渋谷区 中野区 杉並区 豊島区 北区 荒川区 板橋区 練馬区 足立区 葛飾区 江戸川区 八王子市 武蔵野市 調布市 町田市", "神奈川県": "横浜市鶴見区 横浜市神奈川区 横浜市西区 横浜市中区 川崎市川崎区 川崎市幸区 川崎市中原区 平塚市 藤沢市 茅ヶ崎市", "新潟県": "新潟市中央区 新潟市南区 長岡市 三条市 十日町市 南魚沼市", "山梨県": "甲府市 南アルプス市 甲斐市 中央市"}, 45: {"青森県": "青森市 十和田市 むつ市", "岩手県": "久慈市 二戸市 八幡平市", "秋田県": "秋田市 大館市 横手市 湯沢市 大仙市", "山形県": "山形市 米沢市 鶴岡市 酒田市 新庄市 寒河江市 上山市 村山市", "群馬県": "沼田市 藤岡市 富岡市 安中市 みどり市", "埼玉県": "さいたま市浦和区 川越市 所沢市 飯能市 加須市 本庄市 東松山市 春日部市 狭山市 羽生市 鴻巣市 深谷市 上尾市 草加市 越谷市 蕨市 戸田市 入間市 朝霞市 志木市 和光市 新座市 桶川市 久喜市 北本市 八潮市 富士見市 三郷市 蓮田市 坂戸市 幸手市 鶴ヶ島市 日高市 吉川市", "千葉県": "千葉市稲毛区 千葉市若葉区 千葉市緑区 館山市 木更津市 柏市 勝浦市 市原市 流山市 八千代市 我孫子市 鴨川市 鎌ケ谷市 君津市 富津市 浦安市 四街道市 袖ケ浦市 八街市 白井市 富里市 南房総市 匝瑳市 いすみ市", "東京都": "立川市 三鷹市 青梅市 府中市 昭島市 小金井市 小平市 日野市 東村山市 国分寺市 国立市 福生市 狛江市 東大和市 清瀬市 東久留米市 武蔵村山市 多摩市 稲城市 羽村市 あきる野市 西東京市", "神奈川県": "横浜市保土ケ谷区 横浜市磯子区 横浜市金沢区 横浜市港北区 横浜市戸塚区 横浜市港南区 横浜市旭区 横浜市緑区 横浜市瀬谷区 横浜市栄区 横浜市泉区 横浜市青葉区 横浜市都筑区 川崎市高津区 川崎市多摩区 川崎市宮前区 川崎市麻生区 相模原市緑区 相模原市中央区 相模原市南区 横須賀市 鎌倉市 逗子市 三浦市 秦野市 厚木市 大和市 伊勢原市 海老名市 座間市 綾瀬市", "新潟県": "新潟市北区 新潟市東区 新潟市江南区 新潟市秋葉区 新潟市西区 新潟市西蒲区 柏崎市 新発田市 小千谷市 加茂市 見附市 村上市 燕市 糸魚川市 妙高市 五泉市 上越市 阿賀野市 佐渡市 魚沼市 胎内市", "山梨県": "富士吉田市 都留市 山梨市 大月市 韮崎市 北杜市 笛吹市 上野原市 甲州市", "長野県": "長野市 松本市 上田市 岡谷市 飯田市 諏訪市 須坂市 小諸市 伊那市 駒ヶ根市 中野市 大町市 飯山市 茅野市 塩尻市 佐久市 千曲市 東御市 安曇野市", "静岡県": "静岡市葵区 沼津市 富士宮市 御殿場市", "愛知県": "名古屋市中村区"}, 40: {"青森県": "弘前市 黒石市 五所川原市 つがる市 平川市", "秋田県": "能代市 男鹿市 かほく市 にかほ市 仙北市", "山形県": "天童市 東根市 尾花沢市 南陽市", "神奈川県": "小田原市 南足柄市", "静岡県": "静岡市駿河区 静岡市清水区 浜松市中区 浜松市東区 浜松市南区 浜松市浜北区 三島市 伊東市 島田市 富士市 磐田市 焼津市 掛川市 藤枝市 裾野市 袋井市 牧之原市", "愛知県": "名古屋市千種区 名古屋市東区 名古屋市北区 名古屋市西区 名古屋市中区 名古屋市昭和区 名古屋市瑞穂区 名古屋市熱田区 名古屋市中川区 名古屋市港区 名古屋市南区 名古屋市守山区 名古屋市緑区 名古屋市名東区 名古屋市天白区 豊橋市 岡崎市 一宮市 瀬戸市 半田市 春日井市 豊川市 津島市 碧南市 刈谷市 豊田市 安城市 西尾市 蒲郡市 犬山市 常滑市 江南市 小牧市 稲沢市 新城市 東海市 大府市 知多市 知立市 尾張旭市 高浜市 岩倉市 豊明市 日進市 愛西市 清須市 北名古屋市 弥富市 みよし市 あま市", "岐阜県": "岐阜市 大垣市 高山市 多治見市 関市 中津川市 美濃市 瑞浪市 羽島市 恵那市 美濃加茂市 土岐市 各務原市 可児市 山県市 瑞穂市 飛騨市 本巣市 郡上市 下呂市 海津市", "三重県": "津市 四日市市 伊勢市 松阪市 桑名市 鈴鹿市 名張市 尾鷲市 亀山市 鳥羽市 熊野市 いなべ市 志摩市 伊賀市", "滋賀県": "大津市 彦根市 長浜市 近江八幡市 草津市 守山市 栗東市 甲賀市 野洲市 湖南市 高島市 東近江市 米原市", "京都府": "京都市北区 京都市上京区 京都市左京区 京都市中京区 京都市東山区 京都市下京区 京都市南区 京都市右京区 京都市伏見区 京都市山科区 京都市西京区 福知山市 舞鶴市 綾部市 宇治市 宮津市 亀岡市 城陽市 向日市 長岡京市 八幡市 京田辺市 京丹後市 南丹市 木津川市", "大阪府": "大阪市都島区 大阪市福島区 大阪市此花区 大阪市西区 大阪市港区 大阪市大正区 大阪市天王寺区 大阪市浪速区 大阪市西淀川区 大阪市東淀川区 大阪市東成区 大阪市生野区 大阪市旭区 大阪市城東区 大阪市阿倍野区 大阪市住吉区 大阪市東住吉区 大阪市西成区 大阪市淀川区 大阪市鶴見区 大阪市住之江区 大阪市平野区 大阪市北区 大阪市中央区 堺市堺区 堺市中区 堺市東区 堺市西区 堺市南区 堺市北区 堺市美原区 岸和田市 豊中市 池田市 吹田市 泉大津市 高槻市 貝塚市 守口市 枚方市 茨木市 八尾市 泉佐野市 富田林市 寝屋川市 河内長野市 松原市 大東市 和泉市 箕面市 柏原市 羽曳野市 門真市 摂津市 高石市 藤井寺市 東大阪市 泉南市 四條畷市 交野市 大阪狭山市 阪南市", "兵庫県": "神戸市東灘区 神戸市灘区 神戸市兵庫区 神戸市長田区 神戸市須磨区 神戸市垂水区 神戸市北区 神戸市中央区 神戸市西区 姫路市 尼崎市 明石市 西宮市 洲本市 芦屋市 伊丹市 相生市 豊岡市 加古川市 赤穂市 西脇市 宝塚市 三木市 高砂市 川西市 小野市 三田市 加西市 篠山市 養父市 丹波市 南あわじ市 朝来市 淡路市 宍粟市 加東市 たつの市", "奈良県": "奈良市 大和高田市 大和郡山市 天理市 橿原市 桜井市 五條市 御所市 生駒市 香芝市 葛城市 宇陀市", "和歌山県": "和歌山市 海南市 橋本市 有田市 御坊市 田辺市 新宮市 紀の川市 岩出市", "鳥取県": "鳥取市 米子市 倉吉市 境港市", "島根県": "松江市 出雲市 大田市 安来市 江津市 雲南市", "岡山県": "岡山市北区 岡山市中区 岡山市東区 岡山市南区 倉敷市 津山市 玉野市 笠岡市 井原市 総社市 高梁市 新見市 備前市 瀬戸内市 赤磐市 真庭市 美作市 浅口市", "広島県": "広島市中区 広島市東区 広島市南区 広島市西区 広島市安佐南区 広島市安佐北区 広島市安芸区 広島市佐伯区 呉市 竹原市 三原市 尾道市 福山市 府中市 三次市 庄原市 大竹市 東広島市 廿日市市 安芸高田市 江田島市", "徳島県": "徳島市 鳴門市 小松島市 阿南市 吉野川市 阿波市 美馬市 三好市", "香川県": "高松市 丸亀市 坂出市 善通寺市 観音寺市 さぬき市 東かがわ市 三豊市"}, 30: {"北海道": "函館市 小樽市 旭川市 室蘭市 釧路市 帯広市 北見市 夕張市 岩見沢市 網走市 留萌市 苫小牧市 稚内市 美唄市 芦別市 江別市 赤平市 紋別市 士別市 名寄市 三笠市 根室市 千歳市 滝川市 砂川市 歌志内市 深川市 富良野市 登別市 恵庭市 伊達市 北広島市 石狩市 北斗市", "石川県": "金沢市 七尾市 小松市 輪島市 珠洲市 加賀市 羽咋市 かほく市 白山市 能美市 野々市市", "福井県": "福井市 敦賀市 小浜市 大野市 勝山市 鯖江市 あわら市 越前市 坂井市", "山口県": "下関市 宇部市 山口市 萩市 防府市 下松市 岩国市 光市 長門市 柳井市 美祢市 周南市 山陽小野田市", "愛媛県": "松山市 今治市 宇和島市 八幡浜市 新居浜市 西条市 大洲市 伊予市 四国中央市 西予市 東温市", "高知県": "高知市 室戸市 安芸市 南国市 土佐市 須崎市 宿毛市 土佐清水市 四万十市 香南市 香美市"}, 20: {"佐賀県": "佐賀市 唐津市 鳥栖市 多久市 伊万里市 武雄市 鹿島市 小城市 嬉野市 神埼市", "長崎県": "長崎市 佐世保市 島原市 諫早市 大村市 平戸市 松浦市 対馬市 壱岐市 五島市 西海市 雲仙市 南島原市", "熊本県": "熊本市中央区 熊本市東区 熊本市西区 熊本市南区 熊本市北区 八代市 人吉市 荒尾市 水俣市 玉名市 山鹿市 菊池市 宇土市 上天草市 宇城市 阿蘇市 天草市 合志市", "大分県": "大分市 別府市 中津市 日田市 佐伯市 臼杵市 津久見市 竹田市 豊後高田市 杵築市 宇佐市 豊後大野市 由布市 国東市", "宮崎県": "宮崎市 都城市 延岡市 日南市 小林市 日向市 串間市 西都市 えびの市", "鹿児島県": "鹿児島市 鹿屋市 枕崎市 阿久根市 出水市 指宿市 西之表市 垂水市 薩摩川内市 日置市 曽於市 霧島市 いちき串木野市 南さつま市 志布志市 奄美市 南九州市 伊佐市 姶良市"}, 10: {"沖縄県": "那覇市 宜野湾市 石垣市 浦添市 名護市 糸満市 沖縄市 豊見城市 うるま市 宮古島市 南城市"} } },
+            { id: "h-2011-tohoku-aft1", t: "2011/03/11 15:08", loc: "岩手県沖", m: "M7.4", d: "32km", coords: "北緯39.8° / 東経142.8°", eew: "緊急地震速報【警報】", tsu: "津波注意報発表", max: 55, sub: "【余震】", pts: { 55: {"青森県": "八戸市", "岩手県": "盛岡市 二戸市 八幡平市 滝沢市", "宮城県": "栗原市"}, 50: {"青森県": "青森市 十和田市 むつ市 つがる市 弘前市 平川市", "岩手県": "宮古市 大船渡市 釜石市 久慈市 花巻市 北上市 遠野市 一関市 奥州市 矢巾町", "宮城県": "仙台市青葉区 仙台市宮城野区 仙台市若林区 仙台市太白区 仙台市泉区 石巻市 塩竈市 気仙沼市 白石市 名取市 多賀城市 東松島市 大崎市", "秋田県": "秋田市 横手市 湯沢市 大仙市 仙北市", "山形県": "山形市 新庄市", "福島県": "福島市 郡山市 白河市 須賀川市 二本松市 相馬市 南相馬市"}, 45: {"北海道": "函館市", "秋田県": "能代市 男鹿市 かほく市", "山形県": "米沢市 鶴岡市 酒田市 寒河江市 上山市 村山市 天童市 東根市 尾花沢市 南陽市", "福島県": "会津若松市 喜多方市 伊達市", "茨城県": "水戸市 日立市 土浦市 石岡市 常陸太田市 高萩市 笠間市 つくば市 ひたちなか市", "栃木県": "宇都宮市 栃木市", "群馬県": "前橋市"}, 40: {"北海道": "札幌市北区 小樽市 室蘭市 釧路市 帯広市", "茨城県": "下妻市 常総市 取手市 牛久市 筑西市 坂東市", "栃木県": "足利市 佐野市 鹿沼市 日光市 小山市 真岡市 大田原市", "群馬県": "高崎市 桐生市 伊勢崎市 太田市 沼田市 館林市 渋川市 藤岡市 富岡市 安中市 みどり市", "埼玉県": "さいたま市西区 さいたま市北区 さいたま市大宮区 熊谷市 川口市 所沢市", "千葉県": "千葉市中央区 野田市 成田市", "東京都": "千代田区 中央区 港区 新宿区", "神奈川県": "横浜市鶴見区 川崎市川崎区", "新潟県": "新潟市中央区 長岡市", "山梨県": "甲府市", "長野県": "長野市 松本市", "静岡県": "富士市"}, 30: {"北海道": "網走市 苫小牧市 根室市", "東京都": "八王子市 町田市", "神奈川県": "横須賀市 藤沢市 小田原市", "新潟県": "上越市 糸魚川市", "岐阜県": "高山市", "静岡県": "静岡市葵区 浜松市中区", "愛知県": "名古屋市中区", "滋賀県": "彦根市"}, 20: {"三重県": "四日市市", "京都府": "京都市中京区", "大阪府": "大阪市北区 堺市堺区", "兵庫県": "豊岡市 尼崎市", "奈良県": "奈良市", "和歌山県": "和歌山市"}, 10: {"鳥取県": "鳥取市", "島根県": "松江市", "岡山県": "岡山市北区", "広島県": "広島市中区", "福岡県": "福岡市中央区"} } },
+            { id: "h-2011-tohoku-aft2", t: "2011/03/11 15:15", loc: "茨城県沖", m: "M7.6", d: "43km", coords: "北緯36.1° / 東経141.3°", eew: "緊急地震速報【警報】", tsu: "津波注意報発表", max: 60, sub: "【余震】", pts: { 60: {"茨城県": "鉾田市 神栖市"}, 55: {"茨城県": "水戸市 日立市 石岡市 常陸太田市 高萩市 笠間市 つくば市 ひたちなか市 鹿嶋市 潮来市 那珂市 筑西市 小美玉市", "栃木県": "真岡市 大田原市"}, 50: {"宮城県": "岩沼市", "福島県": "白河市 須賀川市 鏡石町 楢葉町", "茨城県": "土浦市 古河市 結城市 龍ケ崎市 下妻市 常総市 取手市 牛久市 坂東市", "栃木県": "宇都宮市 栃木市 鹿沼市 日光市 小山市 矢板市 さくら市", "群馬県": "前橋市 高崎市 桐生市 伊勢崎市 太田市 館林市", "埼玉県": "さいたま市北区 さいたま市大宮区 川口市 熊谷市 秩父市", "千葉県": "千葉市中央区 銚子市 市川市 船橋市 松戸市 野田市 茂原市 成田市 佐倉市 東金市 旭市 柏市"}, 45: {"宮城県": "仙台市青葉区 仙台市宮城野区 仙台市若林区 仙台市太白区 仙台市泉区 石巻市 塩竈市 気仙沼市 白石市 名取市 栗原市", "福島県": "福島市 郡山市 いわき市 二本松市 田村市 相馬市 南相馬市 会津若松市", "栃木県": "足利市 佐野市", "群馬県": "沼田市 渋川市 藤岡市 富岡市 安中市 みどり市", "埼玉県": "さいたま市西区 川越市 所沢市 飯能市 加須市 本庄市 東松山市 春日部市 狭山市", "千葉県": "館山市 木更津市 勝浦市 市原市 流山市 八千代市 我孫子市 鴨川市 鎌ケ谷市 君津市", "東京都": "千代田区 中央区 港区 新宿区 文京区 台東区 墨田区 江東区 品川区 目黒区 大田区 世田谷区 渋谷区 中野区 杉並区 豊島区 北区 荒川区 板橋区 練馬区 足立区 葛飾区 江戸川区 八王子市 町田市", "神奈川県": "横浜市鶴見区 横浜市神奈川区 横浜市西区 横浜市中区 川崎市川崎区 川崎市幸区 川崎市中原区 平塚市 藤沢市 茅ヶ崎市 小田原市"}, 40: {"岩手県": "盛岡市", "秋田県": "秋田市 横手市", "山形県": "山形市 米沢市", "福島県": "喜多方市 伊達市", "東京都": "立川市 三鷹市 青梅市 府中市", "神奈川県": "横須賀市 鎌倉市 逗子市 三浦市 秦野市 厚木市 大和市 伊勢原市 海老名市 座間市 綾瀬市", "新潟県": "新潟市中央区 長岡市", "山梨県": "甲府市 南アルプス市 甲斐市 中央市", "長野県": "長野市 松本市 上田市 飯田市 諏訪市", "静岡県": "静岡市葵区 沼津市 富士宮市 御殿場市", "愛知県": "名古屋市中区"}, 30: {"北海道": "函館市", "青森県": "青森市 八戸市", "新潟県": "上越市", "富山県": "富山市", "石川県": "金沢市", "福井県": "福井市", "岐阜県": "岐阜市", "静岡県": "浜松市中区", "三重県": "津市 四日市市", "滋賀県": "大津市 彦根市", "京都府": "京都市中京区", "大阪府": "大阪市北区 堺市堺区", "兵庫県": "神戸市中央区", "奈良県": "奈良市", "和歌山県": "和歌山市"}, 20: {"鳥取県": "鳥取市", "島根県": "松江市", "岡山県": "岡山市北区", "広島県": "広島市中区", "徳島県": "徳島市", "香川県": "高松市"}, 10: {"愛媛県": "松山市", "高知県": "高知市", "山口県": "山口市", "福岡県": "福岡市中央区"} } },
+            { id: "h-2011-tohoku-aft3", t: "2011/04/07 23:32", loc: "宮城県沖", m: "M7.1", d: "66km", coords: "北緯38.2° / 東経141.9°", eew: "緊急地震速報【警報】", tsu: "津波警報発表", max: 60, sub: "【余震】", pts: { 60: {"宮城県": "仙台市宮城野区 栗原市 登米市 大崎市 岩沼市", "岩手県": "一関市 奥州市 釜石市 大船渡市 遠野市 花巻市 北上市 矢巾町"}, 55: {"青森県": "八戸市 おいらせ町 階上町", "岩手県": "盛岡市 宮古市 久慈市 二戸市 八幡平市 陸前高田市 滝沢市", "宮城県": "仙台市青葉区 仙台市若林区 仙台市太白区 仙台市泉区 石巻市 塩竈市 気仙沼市 白石市 名取市 多賀城市 東松島市 角田市", "秋田県": "秋田市 横手市 大仙市 仙北市", "山形県": "山形市 新庄市 天童市 東根市 尾花沢市 村山市", "福島県": "福島市 郡山市 白河市 須賀川市 二本松市 田村市 相馬市 南相馬市 伊達市"}, 50: {"青森県": "青森市 十和田市 むつ市 つがる市 弘前市 平川市 黒石市 五所川原市", "秋田県": "能代市 男鹿市 かほく市 湯沢市 にかほ市", "山形県": "米沢市 鶴岡市 酒田市 寒河江市 上山市 南陽市", "福島県": "会津若松市 喜多方市 いわき市", "茨城県": "水戸市 日立市 土浦市 石岡市 常陸太田市 高萩市 笠間市 つくば市 ひたちなか市 筑西市 鉾田市", "栃木県": "宇都宮市 栃木市 佐野市 鹿沼市 日光市 小山市 真岡市 大田原市 さくら市 那須烏山市"}, 45: {"茨城県": "古河市 結城市 龍ケ崎市 下妻市 常総市 取手市 牛久市 鹿嶋市 潮来市 守谷市 坂東市", "栃木県": "足利市 矢板市", "群馬県": "前橋市 高崎市 桐生市 伊勢崎市 太田市 沼田市 館林市 渋川市 藤岡市 富岡市 安中市 みどり市", "埼玉県": "さいたま市西区 さいたま市北区 さいたま市大宮区 熊谷市 川口市 行田市 秩父市 所沢市 飯能市 加須市 本庄市 東松山市 春日部市 狭山市", "千葉県": "千葉市中央区 千葉市花見川区 銚子市 市川市 船橋市 松戸市 野田市 茂原市 成田市 佐倉市 東金市 旭市 柏市", "東京都": "千代田区 中央区 港区 新宿区 文京区 台東区 墨田区 江東区 品川区 目黒区 大田区 世田谷区 渋谷区 中野区 杉並区 豊島区 北区 荒川区 板橋区 練馬区 足立区 葛飾区 江戸川区 八王子市 武蔵野市 調布市 町田市", "神奈川県": "横浜市鶴見区 横浜市神奈川区 横浜市西区 横浜市中区 川崎市川崎区 川崎市幸区 川崎市中原区 平塚市 藤沢市 茅ヶ崎市", "新潟県": "新潟市中央区 新潟市南区 長岡市 三条市 十日町市 南魚沼市"}, 40: {"北海道": "函館市 釧路市 帯広市", "埼玉県": "羽生市 鴻巣市 深谷市 上尾市 草加市 越谷市 蕨市 戸田市 入間市 朝霞市 志木市 和光市 新座市 桶川市 久喜市 北本市 八潮市 富士見市 三郷市 蓮田市 坂戸市 幸手市 鶴ヶ島市 日高市 吉川市", "千葉県": "千葉市稲毛区 千葉市若葉区 千葉市緑区 館山市 木更津市 勝浦市 市原市 流山市 八千代市 我孫子市 鴨川市 鎌ケ谷市 君津市 富津市 浦安市 四街道市 袖ケ浦市 八街市 白井市 富里市 南房総市 匝瑳市 いすみ市", "東京都": "立川市 三鷹市 青梅市 府中市 昭島市 小金井市 小平市 日野市 東村山市 国分寺市 国立市 福生市 狛江市 東大和市 清瀬市 東久留米市 武蔵村山市 多摩市 稲城市 羽村市 あきる野市 西東京市", "神奈川県": "横浜市保土ケ谷区 横浜市磯子区 横浜市金沢区 横浜市港北区 横浜市戸塚区 横浜市港南区 横浜市旭区 横浜市緑区 横浜市瀬谷区 横浜市栄区 横浜市泉区 横浜市青葉区 横浜市都筑区 川崎市高津区 川崎市多摩区 川崎市宮前区 川崎市麻生区 相模原市緑区 相模原市中央区 相模原市南区 横須賀市 鎌倉市 逗子市 三浦市 秦野市 厚木市 大和市 伊勢原市 海老名市 座間市 綾瀬市 小田原市 南足柄市", "新潟県": "新潟市北区 新潟市東区 新潟市江南区 新潟市秋葉区 新潟市西区 新潟市西蒲区 柏崎市 新発田市 小千谷市 加茂市 見附市 村上市 燕市 糸魚川市 妙高市 五泉市 上越市 阿賀野市 佐渡市 魚沼市 胎内市", "山梨県": "甲府市 南アルプス市 甲斐市 中央市 富士吉田市 都留市 山梨市 大月市 韮崎市 北杜市 笛吹市 上野原市 甲州市", "長野県": "長野市 松本市 上田市 岡谷市 飯田市 諏訪市 須坂市 小諸市 伊那市 駒ヶ根市 中野市 大町市 飯山市 茅野市 塩尻市 佐久市 千曲市 東御市 安曇野市", "静岡県": "静岡市葵区 沼津市 富士宮市 御殿場市", "愛知県": "名古屋市中区 豊橋市"}, 30: {"北海道": "札幌市北区 小樽市 室蘭市 網走市 苫小牧市 根室市", "静岡県": "静岡市駿河区 静岡市清水区 浜松市中区 浜松市東区 浜松市南区 浜松市浜北区 三島市 伊東市 島田市 富士市 磐田市 焼津市 掛川市 藤枝市 裾野市 袋井市 牧之原市", "岐阜県": "岐阜市 大垣市 高山市 多治見市 関市 中津川市 美濃市 瑞浪市 羽島市 恵那市 美濃加茂市 土岐市 各務原市 可児市 山県市 瑞穂市 飛騨市 本巣市 郡上市 下呂市 海津市", "三重県": "津市 四日市市 伊勢市 松阪市 桑名市 鈴鹿市 名張市 尾鷲市 亀山市 鳥羽市 熊野市 いなべ市 志摩市 伊賀市", "滋賀県": "大津市 彦根市 長浜市 近江八幡市 草津市 守山市 栗東市 甲賀市 野洲市 湖南市 高島市 東近江市 米原市", "京都府": "京都市北区 京都市上京区 京都市左京区 京都市中京区 京都市東山区 京都市下京区 京都市南区 京都市右京区 京都市伏見区 京都市山科区 京都市西京区 福知山市 舞鶴市 綾部市 宇治市 宮津市 亀岡市 城陽市 向日市 長岡京市 八幡市 京田辺市 京丹後市 南丹市 木津川市", "大阪府": "大阪市北区 大阪市中央区 堺市堺区 豊中市 池田市 吹田市 泉大津市 高槻市 貝塚市 守口市 枚方市 茨木市 八尾市 泉佐野市 富田林市 寝屋川市 河内長野市 松原市 大東市 和泉市 箕面市 柏原市 羽曳野市 門真市 摂津市 高石市 藤井寺市 東大阪市 泉南市 四條畷市 交野市 大阪狭山市 阪南市", "兵庫県": "神戸市東灘区 神戸市灘区 神戸市兵庫区 神戸市長田区 神戸市須磨区 神戸市垂水区 神戸市北区 神戸市中央区 神戸市西区 姫路市 尼崎市 明石市 西宮市 洲本市 芦屋市 伊丹市 相生市 豊岡市 加古川市 赤穂市 西脇市 宝塚市 三木市 高砂市 川西市 小野市 三田市 加西市 篠山市 養父市 丹波市 南あわじ市 朝来市 淡路市 宍粟市 加東市 たつの市", "奈良県": "奈良市 大和高田市 大和郡山市 天理市 橿原市 桜井市 五條市 御所市 生駒市 香芝市 葛城市 宇陀市", "和歌山県": "和歌山市 海南市 橋本市 有田市 御坊市 田辺市 新宮市 紀の川市 岩出市"}, 20: {"鳥取県": "鳥取市 米子市 倉吉市 境港市", "島根県": "松江市 出雲市 大田市 安来市 江津市 雲南市", "岡山県": "岡山市北区 岡山市中区 岡山市東区 岡山市南区 倉敷市 津山市 玉野市 笠岡市 井原市 総社市 高梁市 新見市 備前市 瀬戸内市 赤磐市 真庭市 美作市 浅口市", "広島県": "広島市中区 呉市 竹原市 三原市 尾道市 福山市 府中市 三次市 庄原市 大竹市 東広島市 廿日市市 安芸高田市 江田島市", "徳島県": "徳島市 鳴門市 小松島市 阿南市 吉野川市 阿波市 美馬市 三好市", "香川県": "高松市 丸亀市 坂出市 善通寺市 観音寺市 さぬき市 東かがわ市 三豊市", "愛媛県": "松山市 今治市 宇和島市 八幡浜市 新居浜市 西条市 大洲市 伊予市 四国中央市 西予市 東温市", "高知県": "高知市 室戸市 安芸市 南国市 土佐市 須崎市 宿毛市 土佐清水市 四万十市 香南市 香美市"}, 10: {"山口県": "下関市 宇部市 山口市 萩市 防府市 下松市 岩国市 光市 長門市 柳井市 美祢市 周南市 山陽小野田市", "福岡県": "福岡市中央区 北九州市門司区 久留米市 飯塚市 大牟田市", "佐賀県": "佐賀市 唐津市", "熊本県": "熊本市中央区 八代市"} } },
+
+            // 2005 福岡県西方沖地震
+            { id: "h-2005-fukuoka", t: "2005/03/20 10:53", loc: "福岡県西方沖地震", m: "M7.0", d: "9km", coords: "北緯33.7° / 東経130.2°", eew: "制度開始前（2007年以前）", tsu: "津波注意報発表", max: 55, sub: "【本震】", pts: { 55: {"福岡県": "福岡市東区 福岡市中央区 福岡市西区", "佐賀県": "みやき町 神埼市"}, 50: {"福岡県": "福岡市博多区 福岡市南区 春日市 大野城市 糸島市 宗像市", "佐賀県": "佐賀市 唐津市"}, 45: {"福岡県": "久留米市 柳川市 八女市 朝倉市 古賀市 福津市 うきは市 宮若市 嘉麻市", "佐賀県": "鳥栖市 多久市 伊万里市 武雄市 鹿島市 小城市 嬉野市", "長崎県": "壱岐市 松浦市", "大分県": "中津市 日田市 豊後高田市 宇佐市", "熊本県": "荒尾市 玉名市 山鹿市"}, 40: {"福岡県": "北九州市門司区 北九州市若松区 北九州市戸畑区 北九州市小倉北区 北九州市小倉南区 北九州市八幡東区 北九州市八幡西区 大牟田市 直方市 飯塚市 田川市 筑後市 行橋市 豊前市 中間市 小郡市 筑紫野市 大川市 ゆくはし市", "佐賀県": "玄海町", "長崎県": "長崎市 佐世保市 島原市 諫早市 大村市 平戸市 対馬市 五島市 西海市 雲仙市 南島原市", "大分県": "大分市 別府市 佐伯市 臼杵市 津久見市 竹田市 杵築市 豊後大野市 由布市 国東市", "熊本県": "熊本市中央区 熊本市東区 熊本市西区 熊本市南区 熊本市北区 八代市 人吉市 水俣市 菊池市 宇土市 上天草市 宇城市 阿蘇市 天草市 合志市", "山口県": "下関市 宇部市 山口市 萩市 防府市 下松市 岩国市 光市 長門市 柳井市 美祢市 周南市 山陽小野田市", "広島県": "広島市中区 広島市東区 広島市南区 広島市西区 広島市安佐南区 広島市安佐北区 広島市安芸区 広島市佐伯区 呉市 竹原市 三原市 尾道市 福山市 府中市 三次市 庄原市 大竹市 東広島市 廿日市市 安芸高田市 江田島市"}, 30: {"島根県": "松江市 出雲市 大田市 安来市 江津市 雲南市 浜田市 益田市", "岡山県": "岡山市北区 岡山市中区 岡山市東区 岡山市南区 倉敷市 津山市 玉野市 笠岡市 井原市 総社市 高梁市 新見市 備前市 瀬戸内市 赤磐市 真庭市 美作市 浅口市", "鳥取県": "鳥取市 米子市 倉吉市 境港市", "兵庫県": "姫路市 尼崎市 洲本市 豊岡市", "愛媛県": "松山市 今治市 宇和島市 八幡浜市 新居浜市 西条市 大洲市 伊予市 四国中央市 西予市 東温市", "高知県": "高知市 室戸市 安芸市 南国市 土佐市 須崎市 宿毛市 土佐清水市 四万十市 香南市 香美市", "徳島県": "徳島市 鳴門市 小松島市 阿南市 吉野川市 阿波市 美馬市 三好市", "香川県": "高松市 丸亀市 坂出市 善通寺市 観音寺市 さぬき市 東かがわ市 三豊市", "宮崎県": "宮崎市 都城市 延岡市 日南市 小林市 日向市 串間市 西都市 えびの市", "鹿児島県": "鹿児島市 鹿屋市 枕崎市 阿久根市 出水市 指宿市 西之表市 垂水市 薩摩川内市 日置市 曽於市 霧島市 いちき串木野市 南さつま市 志布志市 奄美市 南九州市 伊佐市 姶良市"}, 20: {"大阪府": "大阪市北区 大阪市中央区 堺市堺区 豊中市", "京都府": "京都市中京区 舞鶴市", "奈良県": "奈良市 橿原市", "和歌山県": "和歌山市 田辺市 新宮市", "滋賀県": "大津市 彦根市", "三重県": "津市 四日市市", "愛知県": "名古屋市中区 豊橋市", "岐阜県": "岐阜市 大垣市", "福井県": "福井市 敦賀市 小浜市", "石川県": "金沢市 小松市", "富山県": "富山市"}, 10: {"東京都": "千代田区 新宿区", "神奈川県": "横浜市中区 小田原市", "埼玉県": "さいたま市大宮区 熊谷市", "千葉県": "千葉市中央区", "静岡県": "静岡市葵区 浜松市中央区", "長野県": "長野市 松本市", "新潟県": "新潟市中央区 長岡市", "山梨県": "甲府市", "群馬県": "前橋市", "栃木県": "宇巨宮市", "茨城県": "水戸市"} } },
+            { id: "h-2005-fukuoka-aft", t: "2005/04/20 06:11", loc: "福岡県西方沖", m: "M5.8", d: "14km", coords: "北緯33.7° / 東経130.3°", eew: "制度開始前（2007年以前）", tsu: "津波なし", max: 50, sub: "【余震】", pts: { 50: {"福岡県": "福岡市中央区 福岡市南区 福岡市西区"}, 45: {"福岡県": "福岡市東区 福岡市博多区 春日市 大野城市 糸島市", "佐賀県": "佐賀市 みやき町"}, 40: {"福岡県": "久留米市 柳川市 八女市 宗像市 朝倉市 古賀市 福津市 筑紫野市 大川市 小郡市", "佐賀県": "唐津市 鳥栖市 神埼市", "長崎県": "壱岐市", "大分県": "日田市 中津市", "熊本県": "荒尾市 玉名市"}, 30: {"福岡県": "北九州市門司区 北九州市小倉北区 北九州市八幡西区 大牟田市 直方市 飯塚市 田川市 筑後市 行橋市", "佐賀県": "伊万里市 武雄市 鹿島市 小城市 嬉野市 玄海町", "長崎県": "長崎市 佐世保市 島原市 諫早市 大村市 平戸市 松浦市", "大分県": "大分市 別府市 宇佐市 豊後高田市 竹田市", "熊本県": "熊本市中央区 八代市 山鹿市 菊池市 宇土市 宇城市 阿蘇市", "山口県": "下関市 宇部市 山口市 萩市 防府市 下松市 岩国市 光市 長门市", "広島県": "広島市中区 広島市南区 呉市 尾道市 福山市"}, 20: {"大分県": "佐伯市 杵築市 国東市", "熊本県": "人吉市 水俣市 天草市", "宮崎県": "宮崎市 延岡市 都城市", "山口県": "柳井市 周南市", "広島県": "三原市 三次市 東広島市", "島根県": "松江市 出雲市 浜田市 益田市", "岡山県": "岡山市北区 倉敷市 津山市", "鳥取県": "鳥取市 米子市 境港市", "愛媛県": "松山市 今治市 宇和島市", "高知県": "高知市 四万十市", "徳島県": "徳島市", "香川県": "高松市"}, 10: {"兵庫県": "姫路市 豊岡市", "大阪府": "大阪市北区 堺市堺区", "京都府": "京都市中京区", "和歌山県": "和歌山市", "鹿児島県": "鹿児島市 出水市 薩摩川内市"} } },
+
+            // 2004 新潟県中越地震
+            { id: "h-2004-chuetsu", t: "2004/10/23 17:56", loc: "新潟県中越地震", m: "M6.8", d: "13km", coords: "北緯37.3° / 東経138.9°", eew: "制度開始前（2007年以前）", tsu: "津波なし", max: 70, sub: "【本震】", pts: { 70: {"新潟県": "川口町"}, 60: {"新潟県": "小千谷市 山古志村 小国町"}, 55: {"新潟県": "長岡市 栃尾市 十日町市 越路町 三島町 堀之内町 広神村 守門村 湯之谷村 川西町 中里村"}, 50: {"新潟県": "新潟市西蒲区 燕市 三条市 加茂市 見附市 出雲崎町 柏崎市 上越市 刈羽村"}, 45: {"新潟県": "新潟市中央区 新潟市北区 新潟市東区 新潟市江南区 新潟市秋葉区 新潟市南区 新発田市 五泉市 阿賀野市 村上市 胎内市 妙高市 糸魚川市", "群馬県": "前橋市 高崎市 沼田市 渋川市 水上町"}, 40: {"新潟県": "佐渡市", "山形県": "山形市 米沢市 鶴岡市 酒田市", "福島県": "福島市 郡山市 会津若松市", "茨城県": "水戸市 日立市", "栃木県": "宇都宮市 足利市", "群馬県": "桐生市 伊勢崎市 太田市", "埼玉県": "さいたま市大宮区 熊谷市 川越市", "千葉県": "千葉市中央区 船橋市", "東京都": "千代田区 新宿区", "神奈川県": "横浜市中区 川崎市川崎区", "富山県": "富山市 高岡市 魚津市", "石川県": "金沢市 輪島市", "福井県": "福井市 敦賀市", "山梨県": "甲府市", "長野県": "長野市 松本市 上田市 飯田市 諏訪市", "岐阜県": "高山市"}, 30: {"青森県": "青森市", "岩手県": "盛岡市", "宮城県": "仙台市青葉区", "秋田県": "秋田市", "静岡県": "静岡市葵区 浜松市中区", "愛知県": "名古屋市中区", "三重県": "津市", "滋賀県": "大津市", "京都府": "京都市中京区", "大阪府": "大阪市中央区", "兵庫県": "神戸市中央区", "奈良県": "奈良市"}, 20: {"和歌山県": "和歌山市", "鳥取県": "鳥取市", "島根県": "松江市", "岡山県": "岡山市北区", "広島県": "広島市中区", "徳島県": "徳島市", "香川県": "高松市"}, 10: {"愛媛県": "松山市", "高知県": "高知市", "山口県": "山口市", "福岡県": "福岡市中央区 北九州市門司区", "佐賀県": "佐賀市", "熊本県": "熊本市中央区"} } },
+            { id: "h-2004-chuetsu-aft1", t: "2004/10/23 18:11", loc: "新潟県中越地方", m: "M6.0", d: "10km", coords: "北緯37.3° / 東経138.9°", eew: "制度開始前（2007年以前）", tsu: "津波なし", max: 60, sub: "【余震】", pts: { 60: {"新潟県": "小千谷市 川口町"}, 55: {"新潟県": "長岡市 栃尾市 十日町市 越路町 山古志村 小国町"}, 50: {"新潟県": "見附市 堀之内町 広神村 守門村 湯之谷村 川西町 中里村 出雲崎町 柏崎市"}, 45: {"新潟県": "新潟市中央区 新潟市南区 燕市 三条市 加茂市 新発田市 五泉市 阿賀野市 上越市 刈羽村 妙高市"}, 40: {"新潟県": "村上市 胎内市 糸魚川市 佐渡市", "群馬県": "前橋市 高崎市 沼田市 渋川市 水上町", "長野県": "長野市 松本市 上田市", "福島県": "会津若松市", "山形県": "米沢市 鶴岡市"}, 30: {"福島県": "福島市 郡山市", "山形県": "山形市 酒田市", "茨城県": "水戸市", "栃木県": "宇都宮市", "群馬県": "桐生市 太田市", "埼玉県": "さいたま市大宮区 熊谷市", "千葉県": "千葉市中央区", "東京都": "千代田区 新宿区", "神奈川県": "横浜市中区", "富山県": "富山市 高岡市", "石川県": "金沢市", "福井県": "福井市", "山梨県": "甲府市", "岐阜県": "高山市"}, 20: {"宮城県": "仙台市青葉区", "秋田県": "秋田市", "静岡県": "静岡市葵区", "愛知県": "名古屋市中区", "滋賀県": "大津市", "京都府": "京都市中京区", "大阪府": "大阪市中央区"}, 10: {"岩手県": "盛岡市", "三重県": "津市", "兵庫県": "神戸市中央区", "奈良県": "奈良市", "和歌山県": "和歌山市", "鳥取県": "鳥取市"} } },
+            { id: "h-2004-chuetsu-aft2", t: "2004/10/23 18:34", loc: "新潟県中越地方", m: "M6.5", d: "14km", coords: "北緯37.3° / 東経138.9°", eew: "制度開始前（2007年以前）", tsu: "津波なし", max: 60, sub: "【余震】", pts: { 60: {"新潟県": "長岡市 十日町市 小千谷市 川口町 越路町 山古志村 小国町"}, 55: {"新潟県": "栃尾市 三島町 堀之内町 広神村 守門村 湯之谷村 川西町 中里村 見附市 出雲崎町 柏崎市"}, 50: {"新潟県": "新潟市西蒲区 燕市 三条市 加茂市 新発田市 五泉市 阿賀野市 上越市 刈羽村 妙高市"}, 45: {"新潟県": "新潟市中央区 新潟市北区 新潟市南区 村上市 胎内市 糸魚川市 佐渡市", "群馬県": "前橋市 高崎市 沼田市 渋川市 水上町", "長野県": "長野市 松本市 上田市 飯田市 諏訪市"}, 40: {"山形県": "山形市 米沢市 鶴岡市 酒田市", "福島県": "福島市 郡山市 会津若松市", "茨城県": "水戸市 日立市", "栃木県": "宇都宮市 足利市", "群馬県": "桐生市 太田市", "埼玉県": "さいたま市大宮区 熊谷市 川越市", "千葉県": "千葉市中央区", "東京都": "千代田区 新宿区", "神奈川県": "横浜市中区", "富山県": "富山市 高岡市 魚津市", "石川県": "金沢市 輪島市", "福井県": "福井市 敦賀市", "山梨県": "甲府市", "岐阜県": "高山市"}, 30: {"宮城県": "仙台市青葉区", "秋田県": "秋田市", "静岡県": "静岡市葵区 浜松市中区", "愛知県": "名古屋市中区", "三重県": "津市", "滋賀県": "大津市", "京都府": "京都市中京区", "大阪府": "大阪市中央区", "兵庫県": "神戸市中央区", "奈良県": "奈良市"}, 20: {"青森県": "青森市", "岩手県": "盛岡市", "和歌山県": "和歌山市", "鳥取県": "鳥取市", "島根県": "松江市", "岡山県": "岡山市北区", "広島県": "広島市中区", "香川県": "高松市"}, 10: {"徳島県": "徳島市", "愛媛県": "松山市", "高知県": "高知市", "山口県": "山口市", "福岡県": "福岡市中央区"} } },
+            { id: "h-2004-chuetsu-aft3", t: "2004/10/27 10:40", loc: "新潟県中越地方", m: "M6.1", d: "12km", coords: "北緯37.3° / 東経138.9°", eew: "制度開始前（2007年以前）", tsu: "津波なし", max: 55, sub: "【余震】", pts: { 55: {"新潟県": "長岡市 栃尾市 十日町市 越路町 山古志村 小国町"}, 50: {"新潟県": "小千谷市 川口町 見附市 堀之内町 広神村 守門村 湯之谷村 川西町 中里村 柏崎市"}, 45: {"新潟県": "新潟市中央区 新潟市南区 燕市 三条市 加茂市 新発田市 五泉市 阿賀野市 上越市 刈羽村 出雲崎町"}, 40: {"新潟県": "村上市 胎内市 糸魚川市 佐渡市 妙高市", "群馬県": "前橋市 高崎市 沼田市 渋川市 水上町", "長野県": "長野市 松本市 上田市"}, 30: {"福島県": "福島市 郡山市 会津若松市", "山形県": "山形市 米沢市 鶴岡市 酒田市", "茨城県": "水戸市", "栃木県": "宇都宮市", "埼玉県": "さいたま市大宮区 熊谷市", "千葉県": "千葉市中央区", "東京都": "千代田区 新宿区", "神奈川県": "横浜市中区", "富山県": "富山市 高岡市", "石川県": "金沢市", "福井県": "福井市", "山梨県": "甲府市", "岐阜県": "高山市"}, 20: {"宮城県": "仙台市青葉区", "秋田県": "秋田市", "静岡県": "静岡市葵区", "愛知県": "名古屋市中区", "滋賀県": "大津市", "京都府": "京都市中京区", "大阪府": "大阪市中央区"}, 10: {"岩手県": "盛岡市", "三重県": "津市", "兵庫県": "神戸市中央区", "奈良県": "奈良市", "和歌山県": "和歌山市"} } }
+        ];
+
+        let combinedData = [];
+        let currentSelectedId = null;
+        let lastTopApiId = null; 
+        let lastApiDataSignature = ""; 
+        let historicalArchive = [];
+        let currentListMode = "realtime"; 
+
+        const cleanAddr = (addr) => {
+            if (!addr) return '';
+            if (addr.indexOf('東京') === 0 && addr.indexOf('区') !== -1) {
+                return addr.substring(2, addr.indexOf('区') + 1);
+            }
+            const designated = ['札幌', '仙台', 'さいたま', '千葉', '横浜', '川崎', '相模原', '新潟', '静岡', '浜松', '名古屋', '京都', '大阪', '堺', '神戸', '岡山', '広島', '北九州', '福岡', '熊本'];
+            for (let i = 0; i < designated.length; i = i + 1) {
+                const d = designated[i];
+                if (addr.indexOf(d) === 0 && addr.indexOf('区') !== -1) {
+                    if (addr.indexOf(d + '市') === 0) {
+                        return addr.substring(0, addr.indexOf('区') + 1);
+                    } else {
+                        return d + '市' + addr.substring(d.length, addr.indexOf('区') + 1);
+                    }
+                }
+            }
+            const specials = ['四日市市', '廿日市市', '市川市', '市原市', '野々市市', '十日町市', '大町町', '玉村町', '大村市', '羽村市', '武蔵村山市', '東村山市', '八王子市', '町田市'];
+            for (let i = 0; i < specials.length; i = i + 1) {
+                if (addr.indexOf(specials[i]) === 0) return specials[i];
+            }
+            const gunIdx = addr.indexOf('郡');
+            if (gunIdx !== -1) {
+                const machiIdx = addr.indexOf('町', gunIdx);
+                const muraIdx = addr.indexOf('村', gunIdx);
+                let endIdx = -1;
+                if (machiIdx !== -1 && muraIdx !== -1) {
+                    endIdx = machiIdx < muraIdx ? machiIdx : muraIdx;
+                } else if (machiIdx !== -1) {
+                    endIdx = machiIdx;
+                } else if (muraIdx !== -1) {
+                    endIdx = muraIdx;
+                }
+                if (endIdx !== -1) return addr.substring(0, endIdx + 1);
+            }
+            let endIdx = -1;
+            for (let i = 1; i < addr.length; i = i + 1) {
+                const c = addr[i];
+                if (c === '市' || c === '区' || c === '町' || c === '村') {
+                    endIdx = i;
+                    break;
+                }
+            }
+            if (endIdx !== -1) return addr.substring(0, endIdx + 1);
+            return addr;
+        };
+
+        const getEarthquakeTime = (item) => {
+            if (item.earthquake && item.earthquake.time) return new Date(item.earthquake.time);
+            if (item.issue && item.issue.time) return new Date(item.issue.time);
+            return new Date(item.time);
+        };
+
+        const formatTime = (dateObj) => {
+            const y = dateObj.getFullYear();
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            const h = String(dateObj.getHours()).padStart(2, '0');
+            const min = String(dateObj.getMinutes()).padStart(2, '0');
+            return y + '/' + m + '/' + d + ' ' + h + ':' + min;
+        };
+
+        function expandCompactData() {
+            historicalArchive = [];
+            for (let i = 0; i < rawCompactArchive.length; i = i + 1) {
+                const item = rawCompactArchive[i];
+                const expandedPoints = [];
+                const scales = [70, 60, 55, 50, 45, 40, 30, 20, 10];
+                for (let j = 0; j < scales.length; j = j + 1) {
+                    const sc = scales[j];
+                    if (item.pts && item.pts[sc]) {
+                        const prefObj = item.pts[sc];
+                        const prefList = [];
+                        const prefKeys = Object.keys(prefObj);
+                        for (let k = 0; k < prefKeys.length; k = k + 1) {
+                            const pName = prefKeys[k];
+                            const rawCities = prefObj[pName].split(" ");
+                            const cleanCities = [];
+                            for (let c = 0; c < rawCities.length; c = c + 1) {
+                                const cleanC = cleanAddr(rawCities[c]);
+                                if (cleanC && cleanCities.indexOf(cleanC) === -1) {
+                                    cleanCities.push(cleanC);
+                                }
+                            }
+                            if (cleanCities.length > 0) {
+                                prefList.push({ prefName: pName, cities: cleanCities });
+                            }
+                        }
+                        if (prefList.length > 0) {
+                            const scInfo = SCALE_MAP[sc] || { label: "不明", cls: "intensity-unknown" };
+                            expandedPoints.push({
+                                scaleValue: sc,
+                                scaleLabel: scInfo.label,
+                                scaleClass: scInfo.cls,
+                                prefectures: prefList
+                            });
+                        }
+                    }
+                }
+                let tsuText = "この地震による津波の心配はありません。";
+                if (item.tsu !== "津波なし") tsuText = item.tsu;
+
+                historicalArchive.push({
+                    id: item.id,
+                    time: item.t,
+                    location: item.loc,
+                    magnitude: item.m,
+                    depth: item.d,
+                    coords: item.coords || "不明",
+                    eewStatus: item.eew,
+                    tsunami: tsuText,
+                    scaleLabel: SCALE_MAP[item.max].label,
+                    scaleClass: SCALE_MAP[item.max].cls,
+                    scaleValue: item.max,
+                    isHistorical: true,
+                    isForeign: false,
+                    isSubShock: item.sub !== "",
+                    subShockType: item.sub,
+                    pointsData: expandedPoints
+                });
+            }
+        }
+
+        function switchListMode(mode) {
+            currentListMode = mode;
+            const tabRealtime = document.getElementById('tabListRealtime');
+            const tabHistorical = document.getElementById('tabListHistorical');
+            const titleEl = document.getElementById('listTitle');
+            const searchEl = document.getElementById('searchInput');
+
+            if (mode === 'realtime') {
+                tabRealtime.className = "py-1.5 text-xs font-black rounded-md transition flex items-center justify-center gap-1.5 bg-emerald-600 text-white shadow";
+                tabHistorical.className = "py-1.5 text-xs font-bold rounded-md transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800";
+                titleEl.textContent = "最新地震情報";
+                if (searchEl) searchEl.placeholder = "最新地震を検索 (例: 千葉、震度3...)";
+            } else {
+                tabHistorical.className = "py-1.5 text-xs font-black rounded-md transition flex items-center justify-center gap-1.5 bg-indigo-600 text-white shadow";
+                tabRealtime.className = "py-1.5 text-xs font-bold rounded-md transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800";
+                titleEl.textContent = "過去の大地震アーカイブ";
+                if (searchEl) searchEl.placeholder = "過去の地震を検索 (例: 福島、能登、熊本...)";
+
+                let currentIsHistorical = false;
+                for (let i = 0; i < combinedData.length; i = i + 1) {
+                    if (combinedData[i].id === currentSelectedId && combinedData[i].isHistorical) {
+                        currentIsHistorical = true;
+                        break;
+                    }
+                }
+                if (!currentIsHistorical && historicalArchive.length > 0) {
+                    selectEarthquake(historicalArchive[0].id, false);
+                }
+            }
+            filterList();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            const y = now.getFullYear();
+            const m = String(now.getMonth() + 1).padStart(2, '0');
+            const d = String(now.getDate()).padStart(2, '0');
+            const h = String(now.getHours()).padStart(2, '0');
+            const min = String(now.getMinutes()).padStart(2, '0');
+            const s = String(now.getSeconds()).padStart(2, '0');
+            document.getElementById('realtimeClock').textContent = y + '/' + m + '/' + d + ' ' + h + ':' + min + ':' + s;
+        }
+
+        function updateNetworkStatus(isOnline, isInitial) {
+            const banner = document.getElementById('networkStatusBanner');
+            if (!isOnline) {
+                banner.textContent = 'オフラインです';
+                banner.className = 'fixed top-0 left-0 w-full py-2 text-center text-sm font-bold text-white z-[100] transition-transform duration-300 translate-y-0 bg-red-600 shadow-md';
+            } else {
+                if (!isInitial) {
+                    banner.textContent = 'オンラインになりました';
+                    banner.className = 'fixed top-0 left-0 w-full py-2 text-center text-sm font-bold text-white z-[100] transition-transform duration-300 translate-y-0 bg-emerald-600 shadow-md';
+                    setTimeout(function() {
+                        banner.className = 'fixed top-0 left-0 w-full py-2 text-center text-sm font-bold text-white z-[100] transition-transform duration-300 -translate-y-full bg-emerald-600 shadow-md';
+                    }, 4000);
+                } else {
+                    banner.className = 'fixed top-0 left-0 w-full py-2 text-center text-sm font-bold text-white z-[100] transition-transform duration-300 -translate-y-full bg-emerald-600 shadow-md';
+                }
+            }
+        }
+
+        function fetchRealTimeData(isFirstLoad) {
+            fetch("https://api.p2pquake.net/v2/history?codes=551&limit=30")
+                .then(function(res) { return res.json(); })
+                .then(function(apiData) {
+                    if (apiData.length > 0) {
+                        const topId = apiData[0].id;
+                        let currentSignature = "";
+                        for (let s = 0; s < Math.min(10, apiData.length); s = s + 1) {
+                            const itm = apiData[s];
+                            const eqH = itm.earthquake ? (itm.earthquake.hypocenter.magnitude + "_" + itm.earthquake.hypocenter.depth) : "";
+                            currentSignature += itm.id + ":" + eqH + "|";
+                        }
+
+                        const isBrandNewEarthquake = !isFirstLoad && lastTopApiId !== null && (topId !== lastTopApiId);
+                        const isDataChanged = isFirstLoad || (lastApiDataSignature !== currentSignature);
+
+                        if (isDataChanged || isBrandNewEarthquake) {
+                            lastTopApiId = topId;
+                            lastApiDataSignature = currentSignature;
+                            processData(apiData, isFirstLoad, isBrandNewEarthquake);
+                        }
+                    }
+                })
+                .catch(function(err) {
+                    if (isFirstLoad) {
+                        document.getElementById("earthquakeList").innerHTML = '<div class="p-4 text-center text-red-400 text-xs">通信エラーが発生しました。<br>リロードしてください。</div>';
+                    }
+                });
+        }
+
+        function initApp() {
+            try {
+                updateNetworkStatus(navigator.onLine, true);
+                window.addEventListener('online', function() { updateNetworkStatus(true, false); });
+                window.addEventListener('offline', function() { updateNetworkStatus(false, false); });
+
+                expandCompactData();
+                setInterval(updateClock, 1000);
+                updateClock();
+                
+                fetchRealTimeData(true);
+                
+                setInterval(function() {
+                    if (navigator.onLine) {
+                        fetchRealTimeData(false);
+                    }
+                }, 15000);
+            } catch (err) {
+                console.error("App Initialization Error:", err);
+            }
+        }
+
+        function processData(rawData, isFirstLoad, isBrandNewEarthquake) {
+            let processedApiList = [];
+            let deduplicateMap = {};
+
+            for (let i = 0; i < rawData.length; i = i + 1) {
+                const item = rawData[i];
+                if (!item.earthquake) continue;
+
+                const eqTimeRaw = item.earthquake.time || item.time;
+                if (deduplicateMap[eqTimeRaw]) continue;
+                deduplicateMap[eqTimeRaw] = true;
+
+                const eq = item.earthquake;
+                let scaleVal = eq.maxScale;
+                let scaleObj = SCALE_MAP[scaleVal] || { label: "不明", cls: "intensity-unknown" };
+                
+                let mag = eq.hypocenter.magnitude;
+                let depth = eq.hypocenter.depth;
+                let loc = eq.hypocenter.name || "震源地不明";
+
+                let lat = eq.hypocenter.latitude;
+                let lon = eq.hypocenter.longitude;
+                let coordsText = "不明";
+
+                if (lat != null && lon != null && lat !== -200 && lon !== -200) {
+                    let latDir = lat >= 0 ? "北緯" : "南緯";
+                    let lonDir = lon >= 0 ? "東経" : "西経";
+                    coordsText = latDir + Math.abs(lat).toFixed(1) + "° / " + lonDir + Math.abs(lon).toFixed(1) + "°";
+                }
+                
+                let magText = mag === -1 ? "不明" : "M" + mag.toFixed(1);
+                let depthText = depth === -1 ? "不明" : depth + "km";
+                if (depth === 0) depthText = "ごく浅い";
+                
+                let tsuText = "この地震による津波の心配はありません。";
+                if (item.issue && item.issue.tsunami && item.issue.tsunami !== "None") {
+                    if (item.issue.tsunami === "Warning") tsuText = "津波警報発表中";
+                    else if (item.issue.tsunami === "Watch") tsuText = "津波注意報発表中";
+                    else if (item.issue.tsunami === "NonEffective") tsuText = "若干の海面変動あり（津波の心配なし）";
+                    else if (item.issue.tsunami === "Checking") tsuText = "津波の影響を調査中";
+                    else if (item.issue.tsunami === "Unknown") tsuText = "津波の影響は不明";
+                }
+
+                // 遠地地震（海外地震）の判定
+                let isForeign = false;
+                if (item.issue && item.issue.type === "Foreign") {
+                    isForeign = true;
+                } else if (scaleVal === -1 && (!item.points || item.points.length === 0)) {
+                    const foreignKeywords = ["海外", "南米", "北米", "太平洋", "台湾", "フィリピン", "インドネシア", "パプア", "トンガ", "バヌアツ", "ソロモン", "フィジー", "チリ", "ペルー", "アラスカ", "ハワイ", "サハリン", "カムチャツカ", "千島"];
+                    for (let f = 0; f < foreignKeywords.length; f = f + 1) {
+                        if (loc.indexOf(foreignKeywords[f]) !== -1) {
+                            isForeign = true;
+                            break;
+                        }
+                    }
+                }
+
+                // 緊急地震速報の判定（海外地震は「遠地地震」と表示）
+                let eewStatusText = "発表なし（基準以下）";
+                if (isForeign) {
+                    eewStatusText = "遠地地震";
+                } else if (scaleVal >= 45) {
+                    eewStatusText = "緊急地震速報【警報】";
+                } else if (scaleVal >= 30 || (mag !== -1 && mag >= 3.5)) {
+                    eewStatusText = "緊急地震速報【予報】";
+                } else {
+                    eewStatusText = "発表なし（基準以下）";
+                }
+
+                const parsedPoints = groupObservationPoints(item.points || []);
+                const cleanTimeStr = formatTime(getEarthquakeTime(item));
+
+                processedApiList.push({
+                    id: item.id,
+                    isHistorical: false,
+                    isForeign: isForeign,
+                    isSubShock: false,
+                    subShockType: "",
+                    time: cleanTimeStr,
+                    location: loc,
+                    magnitude: magText,
+                    depth: depthText,
+                    coords: coordsText,
+                    eewStatus: eewStatusText,
+                    tsunami: tsuText,
+                    scaleLabel: scaleObj.label,
+                    scaleClass: scaleObj.cls,
+                    scaleValue: scaleVal,
+                    pointsData: parsedPoints
+                });
+            }
+
+            combinedData = processedApiList.concat(historicalArchive);
+
+            combinedData.sort(function(a, b) {
+                if (a.time > b.time) return -1;
+                if (a.time < b.time) return 1;
+                return 0;
+            });
+
+            if (isFirstLoad || isBrandNewEarthquake) {
+                let firstRealTimeId = null;
+                for (let k = 0; k < combinedData.length; k = k + 1) {
+                    if (!combinedData[k].isHistorical) {
+                        firstRealTimeId = combinedData[k].id;
+                        break;
+                    }
+                }
+                const targetId = firstRealTimeId || combinedData[0].id;
+                
+                if (isBrandNewEarthquake) {
+                    switchListMode('realtime');
+                }
+                
+                selectEarthquake(targetId, false);
+
+                if (!isFirstLoad) {
+                    const detailsEl = document.getElementById("detailsSection");
+                    if (detailsEl) {
+                        detailsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }
+            } else {
+                if (currentSelectedId) {
+                    selectEarthquake(currentSelectedId, true);
+                } else {
+                    filterList();
+                }
+            }
+        }
+
+        function groupObservationPoints(pointsArr) {
+            const muniMaxScaleMap = {};
+            
+            for (let i = 0; i < pointsArr.length; i = i + 1) {
+                const pt = pointsArr[i];
+                if (pt.isArea) continue; 
+                
+                const sc = pt.scale;
+                const pref = pt.pref;
+                const rawAddr = pt.addr || pt.name || '';
+                const muni = cleanAddr(rawAddr); 
+                
+                if (!muni || !pref) continue;
+                
+                const key = pref + '::' + muni;
+                if (!muniMaxScaleMap[key] || sc > muniMaxScaleMap[key].scale) {
+                    muniMaxScaleMap[key] = {
+                        pref: pref,
+                        muni: muni,
+                        scale: sc
+                    };
+                }
+            }
+
+            const scalesObj = {};
+            const keys = Object.keys(muniMaxScaleMap);
+            for (let i = 0; i < keys.length; i = i + 1) {
+                const item = muniMaxScaleMap[keys[i]];
+                const sc = item.scale;
+                const pref = item.pref;
+                const muni = item.muni;
+
+                if (!scalesObj[sc]) scalesObj[sc] = {};
+                if (!scalesObj[sc][pref]) scalesObj[sc][pref] = [];
+                scalesObj[sc][pref].push(muni);
+            }
+
+            const result = [];
+            const sortedScales = Object.keys(scalesObj).map(Number).sort(function(a, b) { return b - a; });
+            
+            for (let i = 0; i < sortedScales.length; i = i + 1) {
+                const scVal = sortedScales[i];
+                const prefsObj = scalesObj[scVal];
+                const prefList = [];
+                const prefNames = Object.keys(prefsObj);
+                
+                for (let j = 0; j < prefNames.length; j = j + 1) {
+                    prefList.push({
+                        prefName: prefNames[j],
+                        cities: prefsObj[prefNames[j]]
+                    });
+                }
+                
+                const scInfo = SCALE_MAP[scVal] || { label: "不明", cls: "intensity-unknown" };
+                result.push({
+                    scaleValue: scVal,
+                    scaleLabel: scInfo.label,
+                    scaleClass: scInfo.cls,
+                    prefectures: prefList
+                });
+            }
+            return result;
+        }
+
+        function filterList() {
+            const listEl = document.getElementById("earthquakeList");
+            const countEl = document.getElementById("listCount");
+            const searchEl = document.getElementById("searchInput");
+            if (!searchEl) return;
+            const keyword = searchEl.value.trim().toLowerCase();
+            const isSearchEmpty = (keyword === "");
+            
+            let html = "";
+            let matchCount = 0;
+
+            for (let i = 0; i < combinedData.length; i = i + 1) {
+                const eq = combinedData[i];
+                
+                if (currentListMode === "realtime" && eq.isHistorical) continue;
+                if (currentListMode === "historical" && !eq.isHistorical) continue;
+
+                if (!isSearchEmpty) {
+                    let isMatch = false;
+                    if (eq.location.toLowerCase().indexOf(keyword) !== -1) isMatch = true;
+                    if (eq.scaleLabel.toLowerCase().indexOf(keyword) !== -1) isMatch = true;
+                    if (eq.time.indexOf(keyword) !== -1) isMatch = true;
+                    if (eq.subShockType.indexOf(keyword) !== -1) isMatch = true;
+                    if (eq.eewStatus.indexOf(keyword) !== -1) isMatch = true;
+                    if (!isMatch) continue;
+                }
+
+                matchCount = matchCount + 1;
+                let boxClass = eq.id === currentSelectedId ? "bg-slate-800 border-blue-500 shadow-md" : "bg-slate-900/50 border-slate-700 hover:bg-slate-800/80";
+                
+                let tagsHtml = "";
+                if (eq.isHistorical) {
+                    tagsHtml += '<span class="text-[9px] bg-indigo-600 px-1.5 py-0.5 rounded text-white ml-2">過去記録</span>';
+                } else if (eq.isForeign) {
+                    tagsHtml += '<span class="text-[9px] bg-sky-600 px-1.5 py-0.5 rounded text-white ml-2">遠地地震</span>';
+                } else {
+                    tagsHtml += '<span class="text-[9px] bg-emerald-600 px-1.5 py-0.5 rounded text-white ml-2">最新API</span>';
+                }
+
+                if (eq.isSubShock && eq.subShockType !== "") {
+                    tagsHtml += '<span class="text-[9px] bg-orange-600 px-1.5 py-0.5 rounded text-white ml-1">' + eq.subShockType + '</span>';
+                }
+                
+                html += '<div onclick="selectEarthquake(\'' + eq.id + '\', false)" class="p-2.5 rounded-lg border cursor-pointer transition ' + boxClass + '">';
+                html += '  <div class="flex justify-between items-center mb-1">';
+                html += '    <div class="flex items-center flex-wrap gap-1 truncate text-white font-bold text-xs md:text-sm">' + eq.location + tagsHtml + '</div>';
+                html += '    <span class="text-[10px] md:text-xs font-black px-2 py-0.5 rounded flex-shrink-0 ' + eq.scaleClass + '">' + eq.scaleLabel + '</span>';
+                html += '  </div>';
+                html += '  <div class="flex justify-between items-center text-[10px] md:text-xs text-slate-400">';
+                html += '    <span>' + eq.time + '</span>';
+                html += '    <span class="font-bold text-amber-400">' + eq.magnitude + '</span>';
+                html += '  </div>';
+                html += '</div>';
+            }
+
+            countEl.textContent = matchCount + "件";
+            if (matchCount === 0) {
+                listEl.innerHTML = '<div class="p-4 text-center text-slate-500 text-xs md:text-sm">該当する地震は見つかりませんでした。</div>';
+            } else {
+                listEl.innerHTML = html;
+            }
+        }
+
+        function selectEarthquake(id, isBackgroundRefresh) {
+            const previousSelected = currentSelectedId;
+            currentSelectedId = id;
+            filterList(); 
+            
+            let targetEq = null;
+            for (let i = 0; i < combinedData.length; i = i + 1) {
+                if (combinedData[i].id === id) {
+                    targetEq = combinedData[i];
+                    break;
+                }
+            }
+            if (!targetEq) return;
+
+            document.getElementById("detailLocation").textContent = targetEq.location;
+            document.getElementById("detailDate").textContent = "発生日時: " + targetEq.time;
+            document.getElementById("detailMagnitude").textContent = targetEq.magnitude;
+            document.getElementById("detailDepth").textContent = targetEq.depth;
+            document.getElementById("detailCoords").textContent = targetEq.coords || "不明";
+            
+            const eewEl = document.getElementById("detailEew");
+            eewEl.textContent = targetEq.eewStatus;
+            if (targetEq.eewStatus.indexOf("【警報】") !== -1) {
+                eewEl.className = "font-extrabold text-rose-400 text-xs md:text-sm leading-snug block";
+            } else if (targetEq.eewStatus.indexOf("【予報】") !== -1) {
+                eewEl.className = "font-bold text-amber-300 text-xs md:text-sm leading-snug block";
+            } else if (targetEq.eewStatus === "遠地地震") {
+                eewEl.className = "font-extrabold text-sky-400 text-xs md:text-sm leading-snug block";
+            } else {
+                eewEl.className = "font-semibold text-slate-400 text-xs md:text-sm leading-snug block";
+            }
+
+            document.getElementById("detailTsunami").textContent = targetEq.tsunami;
+            
+            const badge = document.getElementById("detailTypeBadge");
+            if (targetEq.isHistorical) {
+                badge.textContent = "過去の大地震記録";
+                badge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded bg-indigo-500/20 text-indigo-400 border border-indigo-500/30";
+            } else if (targetEq.isForeign) {
+                badge.textContent = "遠地地震（海外）";
+                badge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded bg-sky-500/20 text-sky-400 border border-sky-500/30";
+            } else {
+                badge.textContent = "最新地震情報";
+                badge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+            }
+
+            const subBadge = document.getElementById("aftershockBadge");
+            if (targetEq.isSubShock && targetEq.subShockType !== "") {
+                subBadge.textContent = targetEq.subShockType;
+                subBadge.classList.remove("hidden");
+                subBadge.className = "text-[10px] font-extrabold px-2 py-0.5 rounded bg-orange-500/20 text-orange-400 border border-orange-500/30";
+            } else {
+                subBadge.classList.add("hidden");
+            }
+
+            const intensityEl = document.getElementById("detailIntensity");
+            intensityEl.textContent = targetEq.scaleLabel;
+            intensityEl.className = "inline-flex items-center justify-center font-black text-xl md:text-3xl px-4 py-2 rounded-lg shadow-md border border-slate-500/40 min-w-[80px] " + targetEq.scaleClass;
+
+            const eewBanner = document.getElementById("eewFalseAlarmBanner");
+            const eewBannerText = document.getElementById("eewFalseAlarmText");
+            if (targetEq.eewStatus.indexOf("【警報】") !== -1 && targetEq.scaleValue <= 30) {
+                eewBannerText.textContent = "この地震で緊急地震速報（警報）を発表しましたが、強い揺れは観測されませんでした。";
+                eewBanner.classList.remove("hidden");
+            } else {
+                eewBanner.classList.add("hidden");
+                eewBannerText.textContent = "";
+            }
+
+            const tbody = document.getElementById("intensityTableBody");
+            if (targetEq.pointsData.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="3" class="p-8 text-center text-slate-500 text-xs">この地震による日本国内での震度1以上の観測はありません。</td></tr>';
+            } else {
+                let tableHtml = "";
+                for (let i = 0; i < targetEq.pointsData.length; i = i + 1) {
+                    const group = targetEq.pointsData[i];
+                    const rowSpan = group.prefectures.length;
+                    for (let j = 0; j < group.prefectures.length; j = j + 1) {
+                        const prefData = group.prefectures[j];
+                        tableHtml += '<tr class="border-b border-slate-700 hover:bg-slate-800/50 transition">';
+                        if (j === 0) {
+                            tableHtml += '<td rowspan="' + rowSpan + '" class="p-2 text-center align-middle font-bold border-r border-slate-700 ' + group.scaleClass + '">';
+                            tableHtml += group.scaleLabel;
+                            tableHtml += '</td>';
+                        }
+                        tableHtml += '<td class="p-2 font-bold text-slate-200 border-r border-slate-700 align-top whitespace-nowrap">' + prefData.prefName + '</td>';
+                        const citiesString = prefData.cities.join("　");
+                        tableHtml += '<td class="p-2 text-slate-300 align-top leading-relaxed text-xs md:text-sm">' + citiesString + '</td>';
+                        tableHtml += '</tr>';
+                    }
+                }
+                tbody.innerHTML = tableHtml;
+            }
+
+            if (!isBackgroundRefresh && previousSelected !== null && window.innerWidth < 1024) {
+                const detailsEl = document.getElementById("detailsSection");
+                if (detailsEl) {
+                    detailsEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            }
+        }
+
+        function readAloud() {
+            if (!currentSelectedId || !window.speechSynthesis) return;
+            let targetEq = null;
+            for (let i = 0; i < combinedData.length; i = i + 1) {
+                if (combinedData[i].id === currentSelectedId) {
+                    targetEq = combinedData[i];
+                    break;
+                }
+            }
+            if (!targetEq) return;
+            window.speechSynthesis.cancel();
+            let typeStr = targetEq.isHistorical ? "過去の地震記録です。" : (targetEq.isForeign ? "遠地地震に関する情報です。" : "最新の地震情報です。");
+            let subTypeStr = targetEq.isSubShock ? "この地震は " + targetEq.subShockType + " とみられます。" : "";
+            let textToRead = typeStr + "発生日時、" + targetEq.time + "。" 
+                           + "震源地、" + targetEq.location + "。" + subTypeStr
+                           + "最大" + targetEq.scaleLabel + "。" + "マグニチュード、" + targetEq.magnitude + "。"
+                           + "震源の深さ、" + targetEq.depth + "。" + "緊急地震速報の情報、" + targetEq.eewStatus + "。"
+                           + "津波に関する情報、" + targetEq.tsunami + "。";
+            const msg = new SpeechSynthesisUtterance(textToRead);
+            msg.lang = 'ja-JP';
+            msg.rate = 1.1;
+            window.speechSynthesis.speak(msg);
+        }
+
+        function switchModalTab(tabName) {
+            const tabGuide = document.getElementById('tabBtnGuide');
+            const tabChange = document.getElementById('tabBtnChange');
+            const contentGuide = document.getElementById('modalContentGuide');
+            const contentChange = document.getElementById('modalContentChange');
+
+            if (tabName === 'changelog') {
+                tabChange.className = "pb-1 text-xs md:text-sm font-bold border-b-2 border-emerald-400 text-emerald-400 flex items-center gap-1.5 transition";
+                tabGuide.className = "pb-1 text-xs md:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition";
+                contentChange.classList.remove('hidden');
+                contentGuide.classList.add('hidden');
+            } else {
+                tabGuide.className = "pb-1 text-xs md:text-sm font-bold border-b-2 border-emerald-400 text-emerald-400 flex items-center gap-1.5 transition";
+                tabChange.className = "pb-1 text-xs md:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition";
+                contentGuide.classList.remove('hidden');
+                contentChange.classList.add('hidden');
+            }
+        }
+
+        function openModal(defaultTab) {
+            const modal = document.getElementById('infoModal');
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            switchModalTab(defaultTab || 'guide');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('infoModal');
+            modal.classList.add('hidden');
+            modal.classList.remove('flex');
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
