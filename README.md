@@ -60,7 +60,7 @@
 
 \- \*\*利用API\*\*:
 
-&#x20; - \[P2P地震情報 JSON API v2](https://www.p2pquake.net/)（気象庁電文）
+&#x20; - \[P2P地震情報 JSON API v2](https://www.p2pquake.net/) /（気象庁電文）
 
 &#x20; - \[WebNTP API](https://webntp.shogo82148.com/) / TimeAPI（日本標準時同期）
 
