@@ -74,7 +74,7 @@
                     <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                         <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tight text-white truncate">ソナエール</h1>
                         <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full bg-red-600 text-white tracking-wider border border-red-400 shadow-sm animate-pulse shrink-0">LIVE</span>
-                        <button onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0</button>
+                        <button onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.1</button>
                     </div>
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <!-- 緑のリアルタイム時計 -->
@@ -299,7 +299,7 @@
         <div class="max-w-[1600px] mx-auto px-4 flex justify-center items-center gap-4 text-xs font-bold flex-wrap">
             <button onclick="openModal('guide')" class="text-slate-400 hover:text-white transition underline decoration-slate-600 underline-offset-4">利用規約・ガイドライン・情報取得元</button>
             <span class="text-slate-600">|</span>
-            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0)</button>
+            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.1)</button>
         </div>
     </footer>
 
@@ -309,7 +309,7 @@
             <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900 shrink-0">
                 <div class="flex items-center gap-2 sm:gap-4">
                     <button id="tabBtnGuide" onclick="switchModalTab('guide')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-emerald-400 text-emerald-400 flex items-center gap-1.5 transition">🛡️ 利用規約・ガイドライン・取得元</button>
-                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0)</button>
+                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.1)</button>
                 </div>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1 text-sm font-bold">✕ 閉じる</button>
             </div>
@@ -363,15 +363,31 @@
                 <!-- タブ2: アップデート履歴（v5.0を追加） -->
                 <div id="modalContentChange" class="hidden space-y-4">
                     <!-- v5.0 -->
+                    <!-- v5.0.1 -->
                     <div class="bg-slate-900/60 p-4 rounded-lg border border-emerald-500/40 shadow">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
-                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0</span>
-                                リアルタイム監視・速報性の強化（WebSocket常時接続モニター）※試験版です。
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.1</span>
+                                WS接続不能時の自動フォールバック ＆ 更新の取りこぼし防止
                             </span>
                             <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li><strong>WS接続不能時の自動フォールバック：</strong>ネットワーク環境（社内LAN・一部モバイル回線・iframe埋め込み等）によりWebSocketが接続できない場合、5回連続失敗で<strong>HTTPポーリング（15秒）へ自動切替</strong>します。ポーリング中も5分おきにWS復旧を内部プローブし、復旧したらWS監視へ自動復帰します。</li>
+                            <li><strong>更新の取りこぼし防止（HTTPとの二重化）：</strong>WS接続（再接続問わず）のたびにHTTP /v2/history で最新状態を即座に補完するようにしました。さらにWS監視中も<strong>5分おきにHTTPで静かに照合</strong>するフェイルセーフを追加し、電波状況が悪い環境でも地震情報が更新されない事態を防ぎます。</li>
+                            <li><strong>タブ復帰時の即時同期：</strong>ブラウザのタブに戻った瞬間、HTTP /v2/history と必ず照合して最新状態へ即座に更新します。</li>
+                            <li><strong>表示の誤解を軽減：</strong>地震情報はWSの仕組み上「地震発生時にだけ」電文が配信されるため、平常時に画面が静かなのは仕様どおりです。5分おきの照合により「最終受信」時刻が定期的に更新されるため、監視が生きていることを常に確認できます。現在の監視経路（WS接続中／HTTP監視中）はモニターバーの表示で一目で分かります。</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0</span>
+                                リアルタイム監視・速報性の強化（WebSocket常時接続モニター）
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
                             <li><strong>WebSocketリアルタイム配信へ刷新（最速約0.1秒）：</strong>P2P地震情報のWebSocket API（wss://api.p2pquake.net/v2/ws）へ常時接続し、地震・津波・EEWの電文を受信した瞬間に画面へ反映。1秒毎のHTTPポーリングを廃止し、サーバー負荷とレート制限（60 req/min）の問題を解消しました。</li>
                             <li><strong>自動再接続 ＆ 欠損補完：</strong>切断時は指数バックオフ（1s→2s→4s…最大30s＋ジッター）で自動再接続。readyState監視のwatchdog、タブ復帰時の自動再接続、再接続時のHTTP /v2/historyによる551/552/556の欠損自動補完を搭載。HTTPポーリング（15/30/60秒）へ手動切替も可能です。</li>
                             <li><strong>緊急地震速報（警報）= code 556 の実報対応：</strong>実際のEEW電文を受信すると専用アラートパネルが起動し、震源・M・深さ・発生時刻・予想震度地域（scaleTo）・到達状況（未到達／到達／PLUM法=kindCode）を即時表示。第N報の続報更新・取消（cancelled）に対応。code 554（EEW検知）もログ通知します。</li>
@@ -479,7 +495,7 @@
         }
 
         const rawCompactArchive = [
-            { id: "h-2024-hyuganada", t: "2024/08/08 16:42:55", loc: "日向灘", m: "M7.1", d: "31km", coords: "北緯31.8° / 東経131.7°", eew: "緊急地震速報【警報】", tsu: "津波注意報発表", max: 55, sub: "【南海トラフ地震臨時情報発表】",
+            { id: "h-2024-hyuganada", t: "2024/08/08 16:42:55", loc: "日向灘", m: "M7.1", d: "31km", coords: "北緯31.8° / 東経131.7°", eew: "緊急地震速報【警報】", tsu: "津波注意報発表", max: 55, sub: "【南海トラフ調査契機】",
                 pts: { 55: {"宮崎県": "日南市"}, 50: {"宮崎県": "宮崎市"}, 45: {"宮崎県": "都城市 串間市", "鹿児島県": "大崎町"}, 40: {"愛媛県": "宇和島市 八幡浜市 西予市", "高知県": "宿毛市 土佐清水市", "熊本県": "熊本市南区 人吉市 宇城市", "大分県": "佐伯市", "宮崎県": "小林市 三股町 高原町 国富町 綾町", "鹿児島県": "鹿児島市 鹿屋市 指宿市 垂水市 霧島市 曽於市 志布志市 姶良市 東串良町 錦江町 肝付町"}, 30: {"広島県": "呉市 江田島市", "山口県": "柳井市 防府市", "徳島県": "美馬市", "香川県": "高松市 丸亀市", "福岡県": "久留米市 柳川市 八女市", "佐賀県": "佐賀市 白石町", "長崎県": "島原市 雲仙市", "熊本県": "熊本市中央区 八代市 玉名市 天草市", "大分県": "大分市 別府市 日田市 竹田市", "宮崎県": "延岡市 日向市 えびの市 高千穂町", "鹿児島県": "薩摩川内市 出水市 南さつま市"}, 20: {"兵庫県": "淡路市", "島根県": "益田市", "岡山県": "岡山市 倉敷市", "広島県": "広島市中区 福山市", "山口県": "山口市 下関市", "愛媛県": "松山市 今治市", "高知県": "高知市 安芸市"}, 10: {"兵庫県": "神戸市 姫路市", "大阪府": "大阪市 堺市", "和歌山県": "和歌山市 田辺市", "徳島県": "徳島市 鳴門市"} } },
             { id: "h-2024-noto", t: "2024/01/01 16:10:09", loc: "石川県能登地方", m: "M7.6", d: "16km", coords: "北緯37.5° / 東経137.2°", eew: "緊急地震速報【警報】", tsu: "大津波警報発表", max: 70, sub: "【本震】",
                 pts: { 70: {"石川県": "志賀町 輪島市"}, 60: {"石川県": "七尾市 珠洲市 穴水町 能登町"}, 55: {"新潟県": "長岡市 上越市", "富山県": "富山市 高岡市 氷見市", "石川県": "中能登町"}, 50: {"新潟県": "新潟市中央区 新潟市南区 新潟市西区 三条市 柏崎市 見附市 燕市 糸魚川市 妙高市 佐渡市", "富山県": "舟橋村 滑川市 黒部市 砺波市 小矢部市 南砺市 射水市", "石川県": "金沢市 小松市 加賀市 羽咋市 白山市 かほく市 能美市 津幡町 内灘町 宝達志水町", "福井県": "福井市 あわら市 坂井市"}, 45: {"新潟県": "新潟市北区 東区 江南区 秋葉区 西蒲区 新発田市 加茂市 十日町市 阿賀野市 魚沼市 胎内市", "富山県": "上市町 立山町 入善町 朝日町", "石川県": "川北町 野々市市", "福井県": "大野市 勝山市 鯖江市 越前市 永平寺町 越前町", "長野県": "長野市 諏訪市 中野市 大町市 飯山市 白馬村 小谷村 信濃町 飯綱町 栄村", "岐阜県": "高山市 飛騨市 白川村"}, 40: {"青森県": "階上町", "岩手県": "盛岡市 矢巾町", "宮城県": "涌谷町", "山形県": "鶴岡市 酒田市 米沢市 新庄市 上山市 天童市", "福島県": "会津若松市 喜多方市 西会津町 猪苗代町", "茨城県": "水戸市 日立市 笠間市 常陸大宮市", "栃木県": "宇都宮市 真岡市 高根沢町", "群馬県": "前橋市 高崎市 渋川市", "埼玉県": "さいたま市 熊谷市 川口市 春日部市 越谷市 久喜市", "千葉県": "千葉市中央区 市川市 船橋市 松戸市", "東京都": "千代田区 新宿区 文京区 江東区 杉並区 荒川区 板橋区", "神奈川県": "横浜市中区 川崎市 平塚市 藤沢市", "新潟県": "五泉市 南魚沼市 阿賀町", "山梨県": "甲府市 南アルプス市", "長野県": "松本市 上田市 小諸市 茅野市 佐久市 千曲市 安曇野市", "岐阜県": "岐阜市 大垣市 関市 各務原市 可児市 郡上市 下呂市", "静岡県": "静岡市 浜松市 富士市", "愛知県": "名古屋市中区 豊橋市 一宮市 豊田市", "三重県": "津市 四日市市 鈴鹿市", "滋賀県": "大津市 彦根市 長浜市 近江八幡市 高島市", "京都府": "京都市中京区 福知山市 舞鶴市 宮津市 京丹後市 南丹市", "大阪府": "大阪市北区 中央区 豊中市 高槻市 大東市", "兵庫県": "神戸市中央区 豊岡市 朝来市 丹波篠山市"}, 30: {"北海道": "函館市", "青森県": "青森市 八戸市", "岩手県": "一関市 奥州市", "宮城県": "仙台市 石巻市 大崎市", "秋田県": "秋田市 横手市", "山形県": "山形市", "福島県": "福島市 郡山市 いわき市", "東京都": "八王子市 町田市", "神奈川県": "相模原市 横須賀市", "奈良県": "奈良市", "和歌山県": "和歌山市", "鳥取県": "鳥取市 米子市", "島根県": "松江市 出雲市", "岡山県": "岡山市 倉敷市", "広島県": "広島市中区 福山市", "山口県": "山口市 下関市", "徳島県": "徳島市", "香川県": "高松市", "愛媛県": "松山市"}, 20: {"北海道": "札幌市北区", "秋田県": "能代市", "埼玉県": "所沢市", "愛知県": "岡崎市", "兵庫県": "姫路市 明石市", "高知県": "高知市", "福岡県": "福岡市中央区 北九州市", "佐賀県": "佐賀市", "長崎県": "長崎市", "熊本県": "熊本市", "大分県": "大分市"}, 10: {"北海道": "旭川市 帯広市", "宮城県": "気仙沼市", "徳島県": "鳴門市", "高知県": "四万十市", "福岡県": "久留米市 八女市", "佐賀県": "唐津市", "熊本県": "八代市", "宮崎県": "宮崎市", "鹿児島県": "鹿児島市"} } },
@@ -842,12 +858,15 @@
         }
 
         function changeUpdateInterval(intervalMs) {
+            clearInterval(wsProbeTimer);
+            wsProbeTimer = null;
             if (intervalMs === 'auto' || intervalMs === 'ws') {
                 currentMode = 'ws';
                 currentIntervalMs = 0;
                 const select = document.getElementById('autoUpdateSelect');
                 if (select && select.value !== 'auto') select.value = 'auto';
                 wsReconnectAttempt = 0;
+                startWsReconcileLoop();
                 startRealtimeWs();
                 updateCountdownUI(getAccurateJSTDate());
                 pushMonitorLog('WebSocket自動モードに切り替えました');
@@ -855,6 +874,7 @@
             }
             currentMode = 'poll';
             currentIntervalMs = parseInt(intervalMs, 10);
+            stopWsReconcileLoop();
             stopRealtimeWs();
             const select = document.getElementById('autoUpdateSelect');
             if (select && select.value !== String(currentIntervalMs)) select.value = String(currentIntervalMs);
@@ -1036,6 +1056,7 @@
                     if (document.visibilityState === 'visible') {
                         if (monitorSettings.wakeLock && !wakeLockSentinel) { requestWakeLock(); }
                         if (currentMode === 'ws' && (!ws || ws.readyState !== WebSocket.OPEN)) { startRealtimeWs(); }
+                        backfillFromHttp(); // タブ復帰時は必ず最新状態と照合
                     }
                 });
                 document.addEventListener('fullscreenchange', refreshFullscreenUI);
@@ -1644,6 +1665,8 @@
         let monitorSettings = { chime: true, autoSpeak: false, wakeLock: false, demo: false };
         let wakeLockSentinel = null;
         let audioCtx = null;
+        let wsProbeTimer = null;
+        let wsReconcileTimer = null;
 
         // ---------- 安全な保存/APIラッパー ----------
         function safeStorageGet(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } }
@@ -1767,6 +1790,8 @@
                 apply('w-2 h-2 rounded-full bg-amber-400 animate-pulse inline-block', 'WS 接続中…', 'WebSocketサーバーへ接続しています', '接続中…', 'text-amber-400');
             } else if (next === 'reconnecting') {
                 apply('w-2 h-2 rounded-full bg-amber-500 animate-pulse inline-block', 'WS 再接続中(' + wsReconnectAttempt + ')', '指数バックオフで自動再接続しています', '再接続中', 'text-amber-400');
+            } else if (next === 'failed') {
+                apply('w-2 h-2 rounded-full bg-amber-600 inline-block', 'HTTP 監視中', 'WebSocketに接続できないためHTTPポーリング(15秒)で監視しています。5分おきにWS復旧を自動確認し、復旧したらWSへ戻します。', 'HTTP 監視', 'text-amber-500');
             } else {
                 apply('w-2 h-2 rounded-full bg-slate-500 inline-block', 'WS 停止', 'WebSocketは停止中です (HTTPポーリングまたは手動更新)', 'WS 停止', 'text-slate-400');
             }
@@ -1846,8 +1871,8 @@
                 triggerUpdateFlash();
                 if (wasReconnect) {
                     pushMonitorLog('WebSocketへ再接続しました。欠損分をHTTPで補完します。');
-                    backfillFromHttp();
                 }
+                backfillFromHttp(); // 接続のたびに最新状態をHTTPで即時補完
             };
             sock.onmessage = function (ev) {
                 if (ws !== sock) return;
@@ -1868,18 +1893,86 @@
         function scheduleWsReconnect() {
             if (currentMode !== 'ws') { setWsState('idle'); return; }
             wsReconnectAttempt = wsReconnectAttempt + 1;
+            if (wsReconnectAttempt >= 5) {
+                fallbackToHttpPolling();
+                return;
+            }
             const backoff = Math.min(30000, 1000 * Math.pow(2, Math.min(wsReconnectAttempt - 1, 5)));
             const delay = backoff + Math.floor(Math.random() * 400);
             setWsState('reconnecting');
             clearTimeout(wsReconnectTimer);
             wsReconnectTimer = setTimeout(startRealtimeWs, delay);
-            if (wsReconnectAttempt === 4) {
-                pushMonitorLog('WebSocketの接続が不安定です。バックグラウンドで再試行を継続します。');
+            if (wsReconnectAttempt === 3) {
+                pushMonitorLog('WebSocketの接続が不安定です。自動再試行を継続します…');
             }
+        }
+
+        // WSが接続できない環境（iframe/社内LAN/一部モバイル回線など）ではHTTP 15秒ポーリングへ自動退避し、
+        // 5分おきに内部プローブでWS復旧を確認して、復旧次第WS監視へ自動復帰する
+        function fallbackToHttpPolling() {
+            if (currentMode !== 'ws') return;
+            currentMode = 'poll';
+            currentIntervalMs = 15000;
+            stopWsReconcileLoop();
+            clearTimeout(wsReconnectTimer);
+            if (ws) {
+                const stale = ws;
+                ws = null;
+                try { stale.onclose = null; stale.onerror = null; stale.onmessage = null; stale.close(); } catch (e) { /* noop */ }
+            }
+            const select = document.getElementById('autoUpdateSelect');
+            if (select) select.value = '15000';
+            setWsState('failed');
+            pushMonitorLog('WebSocketに接続できないため、HTTPポーリング（15秒）へ自動切替しました。5分おきにWS復旧を自動確認します。');
+            fetchRealTimeData(false);
+            startWsProbeLoop();
+            updateCountdownUI(getAccurateJSTDate());
+        }
+        function startWsProbeLoop() {
+            clearInterval(wsProbeTimer);
+            wsProbeTimer = setInterval(probeWsUpgrade, 5 * 60 * 1000);
+        }
+        function probeWsUpgrade() {
+            if (currentMode !== 'poll') { clearInterval(wsProbeTimer); wsProbeTimer = null; return; }
+            let probe = null;
+            try { probe = new WebSocket(WS_ENDPOINT); } catch (e) { return; }
+            let settled = false;
+            let tid = null;
+            const finish = function (upgrade) {
+                if (settled) return;
+                settled = true;
+                if (tid !== null) clearTimeout(tid);
+                try { probe.onclose = null; probe.onmessage = null; probe.onopen = null; probe.onerror = null; probe.close(); } catch (e) { /* noop */ }
+                if (upgrade && currentMode === 'poll') {
+                    clearInterval(wsProbeTimer);
+                    wsProbeTimer = null;
+                    pushMonitorLog('WebSocketが復旧しました。WS監視へ自動で戻します。');
+                    changeUpdateInterval('auto');
+                }
+            };
+            tid = setTimeout(function () { finish(false); }, 4000);
+            probe.onopen = function () { finish(true); };
+            probe.onerror = function () { finish(false); };
+            probe.onclose = function () { finish(false); };
+        }
+
+        // WS監視中も5分おきにHTTPで静かに最新状態と照合する（電文の取りこぼし対策のフェイルセーフ）
+        function startWsReconcileLoop() {
+            stopWsReconcileLoop();
+            wsReconcileTimer = setInterval(function () {
+                if (currentMode === 'ws') backfillFromHttp();
+            }, 5 * 60 * 1000);
+        }
+        function stopWsReconcileLoop() {
+            clearInterval(wsReconcileTimer);
+            wsReconcileTimer = null;
         }
         function stopRealtimeWs() {
             currentMode = 'poll';
             clearTimeout(wsReconnectTimer);
+            clearInterval(wsProbeTimer);
+            wsProbeTimer = null;
+            stopWsReconcileLoop();
             stopWsWatchdog();
             if (ws) {
                 const stale = ws;
@@ -2400,5 +2493,5 @@
 
         window.onload = initApp;
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5aedb54089a832c',t:'MTc5NDc1MjAwOA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5aedb54089a832c',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</body>
 </html>
