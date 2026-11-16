@@ -31,6 +31,15 @@
         .intensity-unknown { background-color: #334155; color: #94a3b8; }
         .dark-surface { background-color: #1e293b; border-color: #334155; }
 
+        /* ===== v5.0.3 モバイルヘッダー1行化 ===== */
+        @media (max-width: 639px) {
+            #timeSyncBadge { display: none !important; }
+            #countdownLabel { display: none !important; }
+        }
+        @media (max-width: 379px) {
+            #versionBadge { display: none !important; }
+        }
+
         /* ===== v5.0.2 モバイルUX ===== */
         button, a, select, input, [onclick] { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
         @media (max-width: 640px) {
@@ -84,7 +93,7 @@
                     <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                         <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tight text-white truncate">ソナエール</h1>
                         <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full bg-red-600 text-white tracking-wider border border-red-400 shadow-sm animate-pulse shrink-0">LIVE</span>
-                        <button onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.2</button>
+                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.3</button>
                     </div>
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <!-- 緑のリアルタイム時計 -->
@@ -96,7 +105,7 @@
                 </div>
             </div>
             
-            <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0 w-full sm:w-auto justify-end">
+            <div class="flex items-center gap-1.5 sm:gap-2.5 shrink-0 justify-end">
                 <button onclick="manualRefresh()" id="manualRefreshBtn" title="今すぐ最新データを取得" class="bg-slate-900 hover:bg-slate-700 active:scale-95 border border-slate-600 text-emerald-400 w-8 h-8 sm:w-9 sm:h-9 rounded-lg text-sm font-bold transition flex items-center justify-center shadow">🔄</button>
                 <div class="flex items-center gap-1 bg-slate-900 border border-slate-600 rounded-lg px-2 py-1 sm:py-1.5 shadow h-8 sm:h-9">
                     <span id="updateDot" class="w-2 h-2 rounded-full bg-emerald-400 inline-block transition-all duration-200"></span>
@@ -309,7 +318,7 @@
         <div class="max-w-[1600px] mx-auto px-4 flex justify-center items-center gap-4 text-xs font-bold flex-wrap">
             <button onclick="openModal('guide')" class="text-slate-400 hover:text-white transition underline decoration-slate-600 underline-offset-4">利用規約・ガイドライン・情報取得元</button>
             <span class="text-slate-600">|</span>
-            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.2)</button>
+            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.3)</button>
         </div>
     </footer>
 
@@ -319,7 +328,7 @@
             <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900 shrink-0">
                 <div class="flex items-center gap-2 sm:gap-4">
                     <button id="tabBtnGuide" onclick="switchModalTab('guide')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-emerald-400 text-emerald-400 flex items-center gap-1.5 transition">🛡️ 利用規約・ガイドライン・取得元</button>
-                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.2)</button>
+                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.3)</button>
                 </div>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1 text-sm font-bold">✕ 閉じる</button>
             </div>
@@ -375,15 +384,29 @@
                     <!-- v5.0 -->
                     <!-- v5.0.1 -->
                     <!-- v5.0.2 -->
+                    <!-- v5.0.3 -->
                     <div class="bg-slate-900/60 p-4 rounded-lg border border-emerald-500/40 shadow">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
-                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.2</span>
-                                スマホ表示の使いやすさを全面改善（モバイルUI最適化）
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.3</span>
+                                スマホヘッダーを1行化（コントロールを上段の空きスペースへ）
                             </span>
                             <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li><strong>ヘッダー右側の空きスペースを活用：</strong>2段目（折り返し行）に落ちていた「🔄更新ボタン／WS接続状態／WS自動セレクト」を、スマホでタイトル・時計の右隣の空きスペースへ移動し、ヘッダーを1行に集約しました。</li>
+                            <li><strong>狭幅対応：</strong>639px以下では「JST同期済」バッジと「WS 接続」のカウントダウン文字を非表示（状態は左上の時計行とモニターバーの「WS LIVE」表示で確認できます）。379px以下の極小端末ではバージョンバッジを非表示にし、320px級の端末でも1行レイアウトを維持します。</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0.2</span>
+                                スマホ表示の使いやすさを全面改善（モバイルUI最適化）
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
                             <li><strong>モニターバーが折り返すように：</strong>スマホで横スクロールが必要だったコントロール群（アラート音／読上／常時ON／全画面／訓練）を flex-wrap で画面内に折り返し、すべてのボタンが一目で見えてタップできるようにしました。タップ領域も30px以上に拡大。</li>
                             <li><strong>EEW警報パネルがモバイル最適化：</strong>スマホでは画面上部に左右いっぱい（left/right: 4px）で表示し、ヘッダーと重ならない位置に固定。パネルが高くても画面内でスクロールできるようになりました。</li>
                             <li><strong>ヘッダーの縦長問題を改善：</strong>余白を詰め、1画面に表示される情報量を増やしました。</li>
@@ -2523,5 +2546,5 @@
 
         window.onload = initApp;
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5b56ce2cd79f57e',t:'MTc5NDgyMDg4NA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5b56ce2cd79f57e',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5b58ec8fd4196a9',t:'MTc5NDgyMjI3Mw=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5b58ec8fd4196a9',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
