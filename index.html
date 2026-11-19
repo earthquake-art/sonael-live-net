@@ -359,6 +359,7 @@
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
                             <li><strong>同一地震の電文グループを「issue.time（発報時刻）の新しい順」へ修正：</strong>これまでは電文の到着順・履歴の取得順に依存してベース電文を選んでいたため、震度3以上の地震で「【第2報】震源決定 (震度は速報値)」のまま最終報（各地の震度に関する情報）へ切り替わらないことがありました。今後は常に最新の電文をベースにするため、震度速報→震源に関する情報→各地の震度に関する情報の順で正しく表示が更新されます。</li>
+                            <li><strong>選択中の詳細画面が電文更新で固定化される不具合を修正：</strong>ライブ地震のエントリIDを電文IDではなく「地震（発生時刻）グループ」単位で固定しました。これにより、震度速報の第2報・震源情報・各地の震度に関する情報など、電文が届くたびに選択中の詳細画面が最新の内容へ自動で書き換わります。</li>
                         </ul>
                     </div>
 
@@ -1346,8 +1347,11 @@
                 const eqTime = getEarthquakeTime(baseItem);
                 const cleanTimeStr = formatTime(eqTime, true);
 
+                // ライブ地震エントリのIDは「地震（同一発生時刻グループ）ごと」に固定する
+                // （最新電文が届くたびにIDが変わると、選択中の詳細画面が古い描画のまま固定されてしまうため）
+                const stableEntryId = 'eq-' + String(key).replace(/[^0-9A-Za-z_-]/g, '-');
                 processedApiList.push({
-                    id: baseItem.id,
+                    id: stableEntryId,
                     isHistorical: false,
                     isForeign: isForeign,
                     isScalePrompt: isScalePrompt,
@@ -2543,5 +2547,5 @@
 
         window.onload = initApp;
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5ce63c6495396d0',t:'MTc5NTA4MjY1NQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5ce63c6495396d0',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5ce7e8a5abd3b69',t:'MTc5NTA4Mzc1Mg=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5ce7e8a5abd3b69',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
