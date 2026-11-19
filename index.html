@@ -51,11 +51,6 @@
         }
 
         /* ===== v5.0 追加スタイル ===== */
-        @keyframes eewPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(244, 63, 94, 0.55), 0 25px 50px -12px rgba(0, 0, 0, 0.6); }
-            50% { box-shadow: 0 0 34px 8px rgba(244, 63, 94, 0.5), 0 25px 50px -12px rgba(0, 0, 0, 0.6); }
-        }
-        .eew-alert-panel { animation: eewPulse 1.15s ease-in-out infinite; }
         .ws-live-dot { box-shadow: 0 0 8px 2px rgba(52, 211, 153, 0.85); }
         .scrollbar-none::-webkit-scrollbar { display: none; }
         .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
@@ -93,7 +88,7 @@
                     <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                         <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tight text-white truncate">ソナエール</h1>
                         <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full bg-red-600 text-white tracking-wider border border-red-400 shadow-sm animate-pulse shrink-0">LIVE</span>
-                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.3</button>
+                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.7</button>
                     </div>
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <!-- 緑のリアルタイム時計 -->
@@ -142,8 +137,9 @@
             <button id="fullscreenToggleBtn" onclick="toggleFullscreen()" data-on="false" class="monitor-toggle shrink-0" title="フルスクリーン表示の切替">⛶ 全画面</button>
             <button id="demoModeBtn" onclick="toggleDemoMode()" data-on="false" class="monitor-toggle monitor-toggle-demo shrink-0" title="訓練モード: テスト用のEEW/津波/地震を手動発報できます（実報とは無関係です）">🧪 訓練</button>
             <span id="demoControls" style="display:none" class="items-center gap-1 shrink-0">
-                <button onclick="runDemoScenario('eew')" class="demo-fire" title="訓練: 緊急地震速報（警報）を発報">EEW</button>
-                <button onclick="runDemoScenario('eew-cancel')" class="demo-fire" title="訓練: 緊急地震速報（警報）の取消を発報">EEW取消</button>
+                <button onclick="runDemoScenario('eew')" class="demo-fire" title="訓練: 緊急地震速報（警報）電文を注入（画面には出ず、裏側で551との相関処理のみ行います）">EEW</button>
+                <button onclick="runDemoScenario('eew-cancel')" class="demo-fire" title="訓練: 緊急地震速報（警報）の取消電文を注入（裏側処理）">EEW取消</button>
+                <button onclick="runDemoScenario('eew-forecast')" class="demo-fire" title="訓練: EEW予報を注入（554検知＋地震電文を連続注入し、詳細画面の「緊急地震速報」欄に「【予報】（受信済）」と表示します）">EEW予報</button>
                 <button onclick="runDemoScenario('tsunami')" class="demo-fire" title="訓練: 津波警報(宮城県3m)・注意報を発報">津波</button>
                 <button onclick="runDemoScenario('quake')" class="demo-fire" title="訓練: デモ地震(福島県沖 M5.5 最大震度4)を発報">地震</button>
             </span>
@@ -151,49 +147,6 @@
     </div>
     <!-- ▲▲▲ v5.0 常時表示モニターバー ▲▲▲ -->
 
-    <!-- ▼▼▼ v5.0 緊急地震速報（警報）アラートパネル ▼▼▼ -->
-    <div id="eewAlertPanel" class="hidden fixed z-[90] left-1 right-1 top-1 sm:left-1/2 sm:right-auto sm:top-[84px] lg:top-[88px] sm:-translate-x-1/2 sm:w-[min(94vw,600px)] max-h-[92vh] sm:max-h-none overflow-y-auto sm:overflow-visible rounded-2xl sm:rounded-xl" role="alert" aria-live="assertive">
-        <div id="eewAlertBox" class="eew-alert-panel border-2 border-rose-500 rounded-xl overflow-hidden shadow-2xl bg-[#2a0510]">
-            <div class="flex items-center gap-2 px-3 py-2 bg-rose-950/60 border-b border-rose-800/60">
-                <span id="eewTitleIcon" class="text-lg leading-none">🚨</span>
-                <div class="min-w-0">
-                    <div class="text-[13px] sm:text-base font-black text-rose-100 leading-tight">緊急地震速報<span id="eewAlertKind">（警報）</span></div>
-                    <div class="text-[8px] sm:text-[9px] font-mono text-rose-300/80 leading-tight">JMA EEW Warning via P2PQuake WebSocket</div>
-                </div>
-                <span id="eewSerial" class="ml-auto text-[10px] sm:text-xs font-black px-2 py-0.5 rounded bg-rose-500 text-white shadow">第1報</span>
-                <span id="eewTestChip" class="hidden text-[9px] sm:text-[10px] font-black px-2 py-0.5 rounded bg-amber-400 text-slate-900 border border-amber-200 shadow animate-pulse">訓練</span>
-                <button onclick="dismissEewPanel()" class="text-rose-200 hover:text-white text-xs sm:text-sm font-bold px-1.5 py-1 rounded hover:bg-rose-800/50 transition" title="このパネルを閉じる（新しい速報が来ると再表示されます）">✕</button>
-            </div>
-            <div class="px-3 sm:px-4 py-2.5">
-                <div id="eewCancelledBar" class="hidden mb-2 text-[10px] sm:text-[11px] font-bold text-slate-200 bg-slate-700/60 border border-slate-500 rounded-lg px-2 py-1.5">この緊急地震速報（警報）は取り消されました。</div>
-                <div id="eewHypocenter" class="text-base sm:text-2xl font-black text-white tracking-tight leading-snug">震源調査中</div>
-                <div class="grid grid-cols-3 gap-1.5 sm:gap-2 mt-2 text-center">
-                    <div class="bg-black/40 rounded-lg border border-rose-900/60 py-1.5">
-                        <div class="text-[8px] sm:text-[9px] text-rose-300 font-bold">マグニチュード</div>
-                        <div id="eewMagnitude" class="text-sm sm:text-xl font-black text-amber-300 font-mono">M-.-</div>
-                    </div>
-                    <div class="bg-black/40 rounded-lg border border-rose-900/60 py-1.5">
-                        <div class="text-[8px] sm:text-[9px] text-rose-300 font-bold">深さ</div>
-                        <div id="eewDepth" class="text-sm sm:text-xl font-black text-slate-100">---</div>
-                    </div>
-                    <div class="bg-black/40 rounded-lg border border-rose-900/60 py-1.5">
-                        <div class="text-[8px] sm:text-[9px] text-rose-300 font-bold">発生時刻</div>
-                        <div id="eewOriginTime" class="text-[10px] sm:text-sm font-bold text-slate-100 font-mono leading-5 sm:leading-7">---</div>
-                    </div>
-                </div>
-                <div id="eewConditionNote" class="hidden mt-1.5 text-[9px] sm:text-[10px] text-amber-300/90 font-semibold">※仮定震源要素による速報です（震源・Mは暫定値）。</div>
-                <div class="mt-2">
-                    <div class="text-[8px] sm:text-[9px] text-rose-300 font-bold mb-1">予想される揺れの地域 <span class="text-slate-500 font-normal">（scaleTo / 到達状況）</span></div>
-                    <div id="eewAreasList" class="flex flex-wrap gap-1 max-h-24 sm:max-h-28 overflow-y-auto pr-1"></div>
-                </div>
-            </div>
-            <div class="flex items-center justify-between px-3 py-1.5 bg-black/40 border-t border-rose-900/60">
-                <span id="eewEventId" class="text-[8px] sm:text-[9px] font-mono text-rose-300/70 truncate">eventId: --</span>
-                <span id="eewUpdateTime" class="text-[8px] sm:text-[9px] font-mono text-rose-200/80 shrink-0">最終更新 --:--:--</span>
-            </div>
-        </div>
-    </div>
-    <!-- ▲▲▲ v5.0 緊急地震速報（警報）アラートパネル ▲▲▲ -->
 
     <main id="mainContainer" class="max-w-[1600px] mx-auto w-full flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-0 lg:gap-6 overflow-y-auto lg:overflow-hidden p-2 sm:p-3 lg:p-4 pb-20 lg:pb-4">
         <div id="detailsSection" class="w-full lg:col-span-8 lg:block lg:overflow-y-auto lg:pr-2 space-y-3 sm:space-y-4">
@@ -318,7 +271,7 @@
         <div class="max-w-[1600px] mx-auto px-4 flex justify-center items-center gap-4 text-xs font-bold flex-wrap">
             <button onclick="openModal('guide')" class="text-slate-400 hover:text-white transition underline decoration-slate-600 underline-offset-4">利用規約・ガイドライン・情報取得元</button>
             <span class="text-slate-600">|</span>
-            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.3)</button>
+            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.7)</button>
         </div>
     </footer>
 
@@ -328,23 +281,29 @@
             <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900 shrink-0">
                 <div class="flex items-center gap-2 sm:gap-4">
                     <button id="tabBtnGuide" onclick="switchModalTab('guide')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-emerald-400 text-emerald-400 flex items-center gap-1.5 transition">🛡️ 利用規約・ガイドライン・取得元</button>
-                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.3)</button>
+                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.7)</button>
                 </div>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1 text-sm font-bold">✕ 閉じる</button>
             </div>
             
             <div class="p-4 sm:p-6 overflow-y-auto space-y-6 text-xs sm:text-sm text-slate-300 leading-relaxed">
-                <!-- タブ1: 利用規約・ガイドライン（※一切変更していません） -->
+                <!-- タブ1: 利用規約・ガイドライン・情報取得元 -->
                 <div id="modalContentGuide" class="space-y-6">
                     <section class="bg-slate-900/70 p-4 sm:p-5 rounded-xl border border-slate-700 space-y-3">
                         <h3 class="font-bold text-emerald-400 flex items-center gap-2 text-sm sm:text-base border-b border-slate-700/80 pb-2">📡 第1章 情報取得元および技術配信仕様</h3>
                         <div class="space-y-2.5">
                             <p>本ポータル「ソナエール・ライブ」は、防災啓発・情報支援を目的として開発された非公式の地震情報ビューアーです。</p>
                             <ul class="space-y-1.5 list-disc list-inside text-slate-300 ml-1">
-                                <li><strong class="text-white">API配信基盤：</strong>気象庁が発表する防災気象情報（地震・津波に関する電文）を、「P2P地震情報 JSON API（p2pquake.net API v2 / 開発: たくや氏）」経由でリアルタイム自動取得し表示しています。</li>
-                                <li><strong class="text-white">リアルタイム同期フェッチ：</strong>ネットワーク負荷の軽減と即時性の両立を図るため、ブラウザ内の時計と完全に同期し、設定された秒数（00秒、15秒、30秒、45秒等）の瞬間にAPIへリクエストを発行する独自の軽量通信エンジンを搭載しています。</li>
+                                <li><strong class="text-white">API配信基盤：</strong>気象庁が発表する防災気象情報（地震・津波に関する電文）を、「P2P地震情報 JSON API v2（p2pquake.net / 開発: たくや氏）」経由で取得し表示しています。地震（code 551）、津波警報・注意報・予報（code 552）、緊急地震速報・検知（code 554 / 556）、P2P参加ピア数（code 555）、ユーザー体感報告（code 561 / 9611）の各電文に対応しています。</li>
+                                <li><strong class="text-white">WebSocketリアルタイム配信：</strong>主たる取得経路は、WebSocket（wss://api.p2pquake.net/v2/ws）への常時接続です。地震・津波・緊急地震速報が発表されると、サーバーから電文が即時にプッシュ配信され、画面へ最速で反映されます（平常時に電文が流れないのは、このプッシュ方式の仕様です）。</li>
+                                <li><strong class="text-white">自動再接続・フォールバック：</strong>切断時は指数バックオフで自動的に再接続し、再接続のたびに、またタブへ戻った際に、HTTP「/v2/history」で最新状態を自動補完します。さらにWS監視中も5分ごとにHTTPで照合するフェイルセーフを備えています。ネットワーク環境によりWebSocketが接続できない場合は、HTTPポーリング（15秒／30秒／60秒）へ自動的に切り替わり、5分ごとにWS復旧を自動確認します。</li>
+                                <li><strong class="text-white">緊急地震速報（予報・警報）の裏側処理：</strong>緊急地震速報は、画面上のパネル表示・専用アラート音・自動読上げは行いません。受信した電文はモニターバーのログへ静かに記録した上で、551（震度速報・震源情報）と発生時刻±90秒で自動相関し、該当する地震の詳細画面の「緊急地震速報」欄に、実際に発表された内容どおりに記載します（警報・code 556 →「【警報】（受信済・第N報）」、警報の取消 →「【警報】（発表後取消）」、予報の検知・code 554 →「【予報】（受信済）」）。EEWを受信したにもかかわらず観測された最大震度が震度3以下だった場合は、「緊急地震速報【予報】／【警報】」とだけ記載します。第N報の続報更新の検知（いずれも画面遷移・音声を伴わない裏側処理です）にも対応します。</li>
+                                <li><strong class="text-white">津波モニター（code 552）：</strong>大津波警報・津波警報・津波注意報の区分、対象沿岸、予想される高さ（巨大／高い／１０ｍ超など）、第1波到達予想（arrivalTime／「ただちに津波来襲と予測」等のcondition）、即時避難の呼びかけ、解除を表示します。地震詳細の津波情報は、気象庁電文中の domesticTsunami 等に基づく参考表示です。</li>
+                                <li><strong class="text-white">参考表示について：</strong>モニターバーに表示される「P2Pピア数」と「ユーザー体感報告（561 / 9611）」は、P2Pネットワークの状態とユーザーの体感の集計に基づく参考値であり、気象庁その他の公的機関による発表ではありません。</li>
+                                <li><strong class="text-white">訓練モードについて：</strong>🧪「訓練」をONにした場合に発報される緊急地震速報・津波・地震の電文は、すべて動作確認用のテストデータであり、実際の気象庁電文ではありません（「訓練」バッジ付きで表示されます）。</li>
                                 <li><strong class="text-white">震度の集約とソート：</strong>各都道府県内の市区町村について、同一の自治体内に複数の観測点が存在し異なる震度が観測された場合は、最も強い「最大震度」にのみ集約表示します。また、表示順序は気象庁の公表基準に準拠し、都道府県は北から南（JISコード順）、市区町村は五十音順に自動整列しています。</li>
-                                <li><strong class="text-white">発生時刻の正確な表示：</strong>気象庁の公式発表（分単位）に準拠しつつ、最新地震と過去アーカイブでそれぞれ最適なフォーマット（秒単位・または「○○ごろ」）を用いて正確な時系列を把握できるようにしています。</li>
+                                <li><strong class="text-white">発生時刻の正確な表示：</strong>すべての日時は日本標準時（JST / UTC+9）として厳密に解釈・表示され、閲覧端末のタイムゾーン設定には依存しません。気象庁の公式発表（分単位）に準拠しつつ、最新地震と過去アーカイブでそれぞれ最適なフォーマット（秒単位・または「○○ごろ」）を用いて正確な時系列を把握できるようにしています。</li>
+                                <li><strong class="text-white">時計の自動補正：</strong>端末（PC・スマホ）の内蔵時計のずれは、外部の高精度WebNTPサーバー等と1分おきに自動同期して補正します（補正状況はヘッダーの「JST同期済」バッジで確認できます）。</li>
                             </ul>
                         </div>
                     </section>
@@ -370,7 +329,9 @@
                             <p>本サービスをご利用になるすべてのユーザーは、以下の規約および免責事項に同意したものとみなします。</p>
                             <ul class="space-y-2 list-disc list-inside ml-1">
                                 <li><strong class="text-slate-200">非公式サービスの明示：</strong>当サイトは個人開発による非公式の防災情報ポータルであり、気象業務法に基づく予報業務許可事業者ではありません。独自の地震予知、予報、警報の発令等は一切行いません。</li>
-                                <li><strong class="text-slate-200">即時性・正確性の非保証：</strong>インターネット回線の混雑状況、利用端末の処理能力、またはAPIサーバーの一時的な障害により、情報の表示に遅延、欠落、または不整合が生じる場合があります。また、速報値は気象庁による後日の精査により改定されることがあります。</li>
+                                <li><strong class="text-slate-200">即時性・正確性の非保証：</strong>インターネット回線の混雑状況、利用端末の処理能力、またはAPIサーバーの一時的な障害により、情報の表示に遅延、欠落、または不整合が生じる場合があります。また、ネットワーク環境によりWebSocket接続が拒否される場合、情報はHTTPポーリング経路で表示されるため即時性が低下します。速報値は気象庁による後日の精査により改定されることがあります。</li>
+                                <li><strong class="text-slate-200">参考表示およびデモ表示：</strong>ユーザー体感報告・P2Pピア数などは参考値であり、確定情報ではありません。また、訓練モードで発報される電文はすべてテストデータであり、実際の気象庁発表情報ではありません。これらを実際の防災判断の根拠として扱わないでください。</li>
+                                <li><strong class="text-slate-200">音声読上げ・アラート音：</strong>「🔊音声読上」ボタンおよび津波警報受信時のWeb Audioアラート音は、端末やブラウザの仕様、音量設定、OSのサイレント設定等により再生されない場合があります。緊急地震速報（警報）受信時は音声・アラートは一切発報されません。音の有無にかかわらず、必ず画面の表示内容を目視で確認してください。</li>
                                 <li><strong class="text-slate-200">責任の免除：</strong>本サイトの利用によって生じた直接的、間接的を問わずいかなる損害（生命、身体、財産に対する損害を含む）についても、開発者およびAPI情報提供者は一切の責任を負わないものとします。</li>
                                 <li><strong class="text-slate-200">禁止事項：</strong>クローラー等を用いた過度な連続アクセスによるサーバーへの負荷行為、本サイトのデータを改ざん・悪用する行為、虚偽の災害情報を流布する行為を固く禁じます。</li>
                                 <li><strong class="text-slate-200">公的情報の優先：</strong>災害時における避難行動や最終的な安全確認の判断においては、必ずお住まいの自治体による防災行政無線、気象庁の公式サイト、およびNHK等の公的報道機関の情報を最優先してください。</li>
@@ -385,15 +346,72 @@
                     <!-- v5.0.1 -->
                     <!-- v5.0.2 -->
                     <!-- v5.0.3 -->
+                    <!-- v5.0.5 -->
+                    <!-- v5.0.6 -->
+                    <!-- v5.0.7 -->
                     <div class="bg-slate-900/60 p-4 rounded-lg border border-emerald-500/40 shadow">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
-                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.3</span>
-                                スマホヘッダーを1行化（コントロールを上段の空きスペースへ）
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.7</span>
+                                電文の並びを「発報時刻の新しい順」に修正（最新報を優先）
                             </span>
                             <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li><strong>同一地震の電文グループを「issue.time（発報時刻）の新しい順」へ修正：</strong>これまでは電文の到着順・履歴の取得順に依存してベース電文を選んでいたため、震度3以上の地震で「【第2報】震源決定 (震度は速報値)」のまま最終報（各地の震度に関する情報）へ切り替わらないことがありました。今後は常に最新の電文をベースにするため、震度速報→震源に関する情報→各地の震度に関する情報の順で正しく表示が更新されます。</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0.6</span>
+                                空振りでも「緊急地震速報【予報】／【警報】」とだけ記載
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
+                            <li><strong>空振り時は「緊急地震速報【予報】／【警報】」だけを表示：</strong>EEW受信後の観測最大震度が震度3以下だった場合（空振り）、詳細画面の「緊急地震速報」欄に付記（（受信済）・第N報・発表後取消など）を付けず、「緊急地震速報【予報】」または「緊急地震速報【警報】」とだけ記載します。</li>
+                            <li><strong>黄色い「空振り（誤報）」注記バナーを廃止：</strong>ライブ受信での空振りについて、観測震度・経緯を説明する注記バナーは表示しません（空振り判定そのものとログ記録は継続します）。</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0.5</span>
+                                予報・警報が発表された事実を詳細画面の「緊急地震速報」欄へ記載
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
+                            <li><strong>裏側で発表された緊急地震速報を「緊急地震速報」欄に記載：</strong>551（震度速報・震源情報）と発生時刻±90秒で自動相関し、実際に発表された内容どおりに詳細画面へ記載します。警報（code 556）→「【警報】（受信済・第N報）」、警報の取消 →「【警報】（発表後取消）」、予報の検知（code 554）→「【予報】（受信済）」。</li>
+                            <li><strong>予報（554）の相関を新設：</strong>これまで相関対象は警報（556）のみでしたが、code 554（EEW検知＝予報）の受信履歴も保存し、±90秒で551と相関します。554受信後は該当する地震が確定した時点で「【予報】（受信済）」と記載されます（起動時・再接続時にもHTTP /v2/history から最新554/556を補完します）。</li>
+                            <li><strong>取消との優先順位：</strong>同一地震に対して未取消の556があれば警報（受信済）を、取消済の556のみなら「発表後取消」を、556がなく554のみなら「【予報】（受信済）」を記載します。</li>
+                            <li><strong>訓練モードに「EEW予報」を追加：</strong>554検知＋連動地震電文をワンクリックで注入し、「緊急地震速報」欄への受信済表示をいつでも再現できます。</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0.4</span>
+                                緊急地震速報（警報）を「静かな裏側処理」へ
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
+                            <li><strong>大アラートパネル・専用チャイム・自動読上げを廃止：</strong>緊急地震速報（警報・code 556）は、実報・訓練発報ともに画面上にパネルを表示せず、専用アラート音・自動音声読み上げも発報しません。常時表示モニターとしての視認性・静穏性を優先しました。</li>
+                            <li><strong>裏側処理は引き続き有効：</strong>EEW電文はモニターバーのログへ静かに記録され、551との発生時刻±90秒相関に基づく詳細画面の「受信済（第N報）」表示と、最大震度3以下だった場合の「空振り（誤報）」注記は従来どおり機能します。第N報・取消（cancelled）の検知、code 554（EEW検知）の通知も継続します。</li>
+                            <li><strong>表示物の整理：</strong>不要になったEEWパネル（HTML/CSS/JS）と専用チャイム連動を削除しました。訓練モードの「EEW／EEW取消」ボタンは、電文を注入して相関・ログ処理を試すための裏側処理専用となります。</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0.3</span>
+                                スマホヘッダーを1行化（コントロールを上段の空きスペースへ）
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
                             <li><strong>ヘッダー右側の空きスペースを活用：</strong>2段目（折り返し行）に落ちていた「🔄更新ボタン／WS接続状態／WS自動セレクト」を、スマホでタイトル・時計の右隣の空きスペースへ移動し、ヘッダーを1行に集約しました。</li>
                             <li><strong>狭幅対応：</strong>639px以下では「JST同期済」バッジと「WS 接続」のカウントダウン文字を非表示（状態は左上の時計行とモニターバーの「WS LIVE」表示で確認できます）。379px以下の極小端末ではバージョンバッジを非表示にし、320px級の端末でも1行レイアウトを維持します。</li>
                         </ul>
@@ -1153,6 +1171,16 @@
                 groupedMap.get(key).push(item);
             }
 
+            // 各地震グループ内の電文は「発報時刻（issue.time）の新しい順」に並べ替える
+            // （同一発生時刻の電文が到着順・履歴順で不定になるため、最新の電文を正しく選択する）
+            for (const reports of groupedMap.values()) {
+                reports.sort(function (a, b) {
+                    const ta = parseJstTime(((a.issue && a.issue.time) || a.time || (a.earthquake && a.earthquake.time) || 0)).getTime();
+                    const tb = parseJstTime(((b.issue && b.issue.time) || b.time || (b.earthquake && b.earthquake.time) || 0)).getTime();
+                    return (isNaN(tb) ? 0 : tb) - (isNaN(ta) ? 0 : ta);
+                });
+            }
+
             let processedApiList = [];
 
             for (let g = 0; g < groupOrder.length; g = g + 1) {
@@ -1278,16 +1306,30 @@
                     else if (forTsu === "Unknown") tsuText = "津波の影響は不明";
                 }
 
-                let eewMatched = false;
+                let eewMatchType = null;   // null | 'warning' | 'forecast' | 'cancelled'
                 let eewMatchSerial = null;
                 if (!isForeign) {
                     const originMs = getEarthquakeTime(baseItem).getTime();
-                    const eewHit = findEewForOriginTime(originMs);
-                    if (eewHit) { eewMatched = true; eewMatchSerial = eewHit.serial || null; }
+                    const warnHit = findEewMatch(originMs);
+                    if (warnHit) {
+                        eewMatchType = warnHit.cancelled ? 'cancelled' : 'warning';
+                        eewMatchSerial = warnHit.serial;
+                    } else if (findEewDetectionForTime(originMs)) {
+                        eewMatchType = 'forecast';
+                    }
                 }
+                const eewMatched = (eewMatchType === 'warning' || eewMatchType === 'forecast');
+                // 空振り（EEW受信後の観測最大震度が震度3以下）のときは「緊急地震速報【予報】／【警報】」だけを表示する
+                const eewFalseAlarm = eewMatched && scaleVal !== -1 && scaleVal <= 30;
                 let eewStatusText;
-                if (eewMatched) {
+                if (eewFalseAlarm) {
+                    eewStatusText = eewMatchType === 'warning' ? "緊急地震速報【警報】" : "緊急地震速報【予報】";
+                } else if (eewMatchType === 'warning') {
                     eewStatusText = "緊急地震速報【警報】（受信済" + (eewMatchSerial ? "・第" + eewMatchSerial + "報" : "") + "）";
+                } else if (eewMatchType === 'cancelled') {
+                    eewStatusText = "緊急地震速報【警報】（発表後取消）";
+                } else if (eewMatchType === 'forecast') {
+                    eewStatusText = "緊急地震速報【予報】（受信済）";
                 } else if (isForeign) {
                     eewStatusText = "遠地地震";
                 } else if (isScalePrompt) {
@@ -1321,6 +1363,7 @@
                     coords: coordsText,
                     eewStatus: eewStatusText,
                     eewMatched: eewMatched,
+                    eewMatchType: eewMatchType,
                     eewSerial: eewMatchSerial,
                     freeFormComment: (baseItem.comments && baseItem.comments.freeFormComment) ? String(baseItem.comments.freeFormComment) : "",
                     tsunami: tsuText,
@@ -1526,7 +1569,9 @@
 
             const eewEl = document.getElementById("detailEew");
             eewEl.textContent = targetEq.eewStatus;
-            if (targetEq.eewStatus.indexOf("【警報】") !== -1) {
+            if (targetEq.eewStatus.indexOf("発表後取消") !== -1) {
+                eewEl.className = "font-bold text-slate-500 text-xs sm:text-sm leading-snug block";
+            } else if (targetEq.eewStatus.indexOf("【警報】") !== -1) {
                 eewEl.className = "font-extrabold text-rose-400 text-xs sm:text-sm leading-snug block";
             } else if (targetEq.eewStatus.indexOf("【予報】") !== -1) {
                 eewEl.className = "font-bold text-amber-300 text-xs sm:text-sm leading-snug block";
@@ -1581,12 +1626,12 @@
 
             const eewBanner = document.getElementById("eewFalseAlarmBanner");
             const eewBannerText = document.getElementById("eewFalseAlarmText");
+            const eewKind = (targetEq.eewMatchType === 'forecast') ? "予報" : "警報";
             const isEewWarning = targetEq.eewStatus.indexOf("【警報】") !== -1;
-            const isRealEew = targetEq.isHistorical ? isEewWarning : (targetEq.eewMatched === true);
-            if (isRealEew && targetEq.scaleValue !== -1 && targetEq.scaleValue <= 30) {
-                eewBannerText.textContent = targetEq.isHistorical
-                    ? "この地震で緊急地震速報（警報）を発表しましたが、強い揺れは観測されませんでした。"
-                    : "緊急地震速報（警報）を受信しましたが、観測された最大震度は「" + targetEq.scaleLabel + "」でした。強い揺れは観測されませんでした（空振り）。";
+            // 空振りの場合は「緊急地震速報【予報】／【警報】」とだけ表示し、注記バナーは出さない（v5.0.6）
+            const showHistoricalFalseAlarmNote = targetEq.isHistorical && isEewWarning && targetEq.scaleValue !== -1 && targetEq.scaleValue <= 30;
+            if (showHistoricalFalseAlarmNote) {
+                eewBannerText.textContent = "この地震で緊急地震速報（" + eewKind + "）を発表しましたが、強い揺れは観測されませんでした。";
                 eewBanner.classList.remove("hidden");
             } else {
                 eewBanner.classList.add("hidden");
@@ -1710,6 +1755,7 @@
 
         const liveReports = new Map();    // id -> 551 raw item (HTTP/WS共通)
         let eewRecent = [];               // 556 受信履歴 (相関用)
+        let eewDetections = [];           // 554 検知履歴 (予報相関用)
         let eewLatestEventId = null;
         let tsunamiState = null;          // { cancelled, time, areas[] }
         let userReportCount = 0;
@@ -2093,6 +2139,17 @@
                     applyTsunami552(latest, false);
                 }
             });
+            fetchJsonQuiet(HTTP_HISTORY + '?codes=554&limit=5').then(function (rows) {
+                let added = 0;
+                (rows || []).forEach(function (row) {
+                    if (!row || !row.id) return;
+                    const t = parseJstTime(row.time || 0).getTime();
+                    if (isNaN(t) || Date.now() - t >= 3 * 3600 * 1000) return;
+                    if (!eewDetections.some(function (d) { return d.id === row.id; })) added = added + 1;
+                    storeEewDetection(row);
+                });
+                if (added > 0) processLiveDataFromStore(false, true);
+            });
             fetchJsonQuiet(HTTP_HISTORY + '?codes=556&limit=6').then(function (rows) {
                 let added = 0;
                 (rows || []).forEach(function (row) {
@@ -2115,30 +2172,42 @@
             });
             return m;
         }
-        function scaleToLabel(v) {
-            const map = { 10: '1', 20: '2', 30: '3', 40: '4', 45: '5弱', 50: '5強', 55: '6弱', 60: '6強', 70: '7' };
-            if (v === 99) return '強い揺れ';
-            return (v === -1 || v == null) ? '不明' : '震度' + (map[v] || v);
+        function storeEewDetection(msg) {
+            if (!msg || !msg.id) return;
+            const det = { id: msg.id, time: msg.time || null, type: msg.type || '', receivedAt: Date.now() };
+            for (let i = 0; i < eewDetections.length; i = i + 1) {
+                if (eewDetections[i].id === det.id) { eewDetections[i] = det; return; }
+            }
+            eewDetections.push(det);
+            if (eewDetections.length > 60) eewDetections = eewDetections.slice(eewDetections.length - 60);
         }
-        function kindCodeLabel(k) {
-            if (k === '10') return { text: '未到達', cls: 'text-amber-300 border-amber-500/40 bg-amber-500/10' };
-            if (k === '11') return { text: '到達', cls: 'text-rose-300 border-rose-500/40 bg-rose-500/10' };
-            if (k === '19') return { text: 'PLUM法', cls: 'text-violet-300 border-violet-500/40 bg-violet-500/10' };
-            return { text: '', cls: '' };
-        }
-        function findEewForOriginTime(originMs) {
-            if (!originMs || isNaN(originMs)) return null;
-            for (let i = eewRecent.length - 1; i >= 0; i = i - 1) {
-                const e = eewRecent[i];
-                if (e.cancelled || !e.originTime) continue;
-                const em = parseJstTime(e.originTime).getTime();
-                if (!isNaN(em) && Math.abs(em - originMs) <= 90000) return e;
+        function findEewDetectionForTime(ms) {
+            if (!ms || isNaN(ms)) return null;
+            for (let i = eewDetections.length - 1; i >= 0; i = i - 1) {
+                const t = parseJstTime(eewDetections[i].time || 0).getTime();
+                if (!isNaN(t) && Math.abs(t - ms) <= 90000) return eewDetections[i];
             }
             return null;
         }
+        // 556 の照合: 未取消を優先。取消のみなら {cancelled:true, serial} を返す
+        function findEewMatch(originMs) {
+            if (!originMs || isNaN(originMs)) return null;
+            let cancelledHit = null;
+            for (let i = eewRecent.length - 1; i >= 0; i = i - 1) {
+                const e = eewRecent[i];
+                if (!e.originTime) continue;
+                const em = parseJstTime(e.originTime).getTime();
+                if (isNaN(em) || Math.abs(em - originMs) > 90000) continue;
+                if (!e.cancelled) return { serial: e.serial || null, cancelled: false };
+                if (!cancelledHit) cancelledHit = { serial: e.serial || null, cancelled: true };
+            }
+            return cancelledHit;
+        }
         function handleEewDetection554(msg) {
             const typeLabel = (msg && msg.type === 'Full') ? '全文配信' : (msg && msg.type === 'Chime') ? 'チャイム' : '検知';
-            pushMonitorLog('緊急地震速報の検知情報（' + typeLabel + '）を受信しました');
+            storeEewDetection(msg);
+            pushMonitorLog('緊急地震速報を検知しました（' + typeLabel + '）。該当する地震の「緊急地震速報」欄に反映します（裏側処理）');
+            processLiveDataFromStore(false, true);
         }
         function handleEew556(msg) {
             if (!msg || typeof msg !== 'object') return;
@@ -2151,107 +2220,17 @@
             if (!replaced) eewRecent.push(snap);
             trimEewRecent();
             eewLatestEventId = snap.eventId;
-            renderEewPanel(msg, snap);
-
+            // v5.0.4: EEWは画面・音で発報しない。検知・相関・ログ記録のみを裏側で行う。
             if (snap.cancelled) {
-                pushMonitorLog('緊急地震速報（警報）が取り消されました' + (snap.serial ? '（第' + snap.serial + '報）' : ''));
-                playChime('info');
+                pushMonitorLog('緊急地震速報（警報）の取消を検知しました' + (snap.serial ? '（第' + snap.serial + '報）' : ''));
                 processLiveDataFromStore(false, true);
                 return;
             }
-            playChime('eew');
             const hypText = snap.hypoName || '震源調査中';
-            pushMonitorLog('緊急地震速報（警報）受信: ' + hypText + (snap.serial ? ' 第' + snap.serial + '報' : ''));
-            if (monitorSettings.autoSpeak) {
-                speakText('緊急地震速報。' + hypText + 'で地震が発生しました。' + scaleToLabel(snap.scaleMax) + '程度以上の揺れに警戒してください。');
-            }
+            pushMonitorLog('緊急地震速報（警報）を検知しました: ' + hypText + (snap.serial ? ' 第' + snap.serial + '報' : '') + '（裏側処理）');
             triggerUpdateFlash();
             processLiveDataFromStore(false, true);
         }
-        function renderEewPanel(msg, snap) {
-            const panel = document.getElementById('eewAlertPanel');
-            if (!panel) return;
-            const cancelled = !!snap.cancelled;
-            panel.classList.remove('hidden');
-
-            const box = document.getElementById('eewAlertBox');
-            if (box) {
-                box.className = cancelled
-                    ? 'border-2 border-slate-500 rounded-xl overflow-hidden shadow-2xl bg-slate-800'
-                    : 'eew-alert-panel border-2 border-rose-500 rounded-xl overflow-hidden shadow-2xl bg-[#2a0510]';
-            }
-            const kindEl = document.getElementById('eewAlertKind');
-            if (kindEl) kindEl.textContent = cancelled ? '（取消）' : '（警報）';
-            const titleIcon = document.getElementById('eewTitleIcon');
-            if (titleIcon) titleIcon.textContent = cancelled ? 'ℹ️' : '🚨';
-
-            const serialEl = document.getElementById('eewSerial');
-            if (serialEl) serialEl.textContent = snap.serial ? ('第' + snap.serial + '報') : '速報';
-            const testChip = document.getElementById('eewTestChip');
-            if (testChip) testChip.classList.toggle('hidden', !snap.test);
-            const eventIdEl = document.getElementById('eewEventId');
-            if (eventIdEl) eventIdEl.textContent = 'eventId: ' + (snap.eventId || '--');
-
-            const hypoEl = document.getElementById('eewHypocenter');
-            if (hypoEl) hypoEl.textContent = cancelled ? '緊急地震速報（警報）は取り消されました' : (snap.hypoName || '震源調査中');
-
-            const eq = msg.earthquake || null;
-            const magEl = document.getElementById('eewMagnitude');
-            if (magEl) magEl.textContent = (eq && eq.hypocenter && eq.hypocenter.magnitude != null) ? ('M' + Number(eq.hypocenter.magnitude).toFixed(1)) : 'M-.-';
-            const depthEl = document.getElementById('eewDepth');
-            if (depthEl) {
-                let dText = '---';
-                if (eq && eq.hypocenter && eq.hypocenter.depth != null) {
-                    dText = eq.hypocenter.depth === 0 ? 'ごく浅い' : eq.hypocenter.depth + 'km';
-                }
-                depthEl.textContent = dText;
-            }
-            const originEl = document.getElementById('eewOriginTime');
-            if (originEl) {
-                if (eq && eq.originTime) {
-                    const d = parseJstTime(eq.originTime);
-                    originEl.textContent = isNaN(d.getTime()) ? String(eq.originTime) : formatTime(d, false);
-                } else {
-                    originEl.textContent = '---';
-                }
-            }
-            const condNote = document.getElementById('eewConditionNote');
-            if (condNote) condNote.classList.toggle('hidden', !(eq && eq.condition === '仮定震源要素'));
-            const cancelledBar = document.getElementById('eewCancelledBar');
-            if (cancelledBar) cancelledBar.classList.toggle('hidden', !cancelled);
-
-            const areasWrap = document.getElementById('eewAreasList');
-            if (areasWrap) {
-                if (cancelled || !msg.areas || msg.areas.length === 0) {
-                    areasWrap.innerHTML = cancelled ? '' : '<span class="text-[11px] text-slate-400">対象地域の情報を受信中…</span>';
-                } else {
-                    const sorted = msg.areas.slice().sort(function (a, b) { return (b.scaleTo || 0) - (a.scaleTo || 0); });
-                    let html = '';
-                    for (let i = 0; i < sorted.length; i = i + 1) {
-                        const a = sorted[i];
-                        const kind = kindCodeLabel(a.kindCode);
-                        const scaleTxt = a.scaleTo === 99 ? '強い揺れ' : (a.scaleTo != null ? scaleToLabel(a.scaleTo) : '震度不明');
-                        const areaName = ((a.pref ? a.pref : '') + (a.name && a.name !== a.pref ? ' ' + a.name : '')).trim() || '不明';
-                        html += '<span class="inline-flex items-center gap-1.5 text-[10px] sm:text-[11px] font-bold border rounded-lg px-2 py-1 bg-slate-900/80 border-slate-600 text-slate-100">'
-                            + '<span>' + areaName + '</span>'
-                            + '<span class="text-amber-300">' + scaleTxt + '</span>'
-                            + (kind.text ? '<span class="text-[9px] px-1 py-0.5 rounded border ' + kind.cls + '">' + kind.text + '</span>' : '')
-                            + '</span>';
-                    }
-                    areasWrap.innerHTML = html;
-                }
-            }
-            const updateEl = document.getElementById('eewUpdateTime');
-            if (updateEl) {
-                const now = getAccurateJSTDate();
-                updateEl.textContent = '最終更新 ' + String(now.getUTCHours()).padStart(2, '0') + ':' + String(now.getUTCMinutes()).padStart(2, '0') + ':' + String(now.getUTCSeconds()).padStart(2, '0');
-            }
-        }
-        function dismissEewPanel() {
-            const panel = document.getElementById('eewAlertPanel');
-            if (panel) panel.classList.add('hidden');
-        }
-
         // ---------- 津波 (552) ----------
         const TSUNAMI_GRADE = {
             MajorWarning: { label: '大津波警報', badge: 'bg-rose-600 text-white animate-pulse', rank: 3 },
@@ -2511,6 +2490,24 @@
                         { pref: '岩手県', name: '岩手県', scaleFrom: 30, scaleTo: 40, kindCode: '19', arrivalTime: nowIso }
                     ]
                 });
+            } else if (kind === 'eew-forecast') {
+                // 554（EEW検知＝予報）を注入した直後に、連動する地震電文を注入して「受信済」表示を再現する
+                handleEewDetection554({ code: 554, id: 'demo-eew554-' + suffix, time: nowIso, type: 'Chime' });
+                mergeLiveReport({
+                    code: 551,
+                    id: 'demo-quake-fc-' + suffix,
+                    time: nowIso,
+                    issue: { source: '気象庁（訓練）', time: nowIso, type: 'ScalePrompt', correct: 'None' },
+                    earthquake: { time: nowIso, hypocenter: { name: '宮城県沖（デモ・予報）', latitude: 38.2, longitude: 141.9, depth: 40, magnitude: 4.5 }, maxScale: 40, domesticTsunami: 'None', foreignTsunami: 'None' },
+                    points: [
+                        { pref: '宮城県', addr: '仙台市', isArea: false, scale: 40 },
+                        { pref: '岩手県', addr: '大船渡市', isArea: false, scale: 30 }
+                    ],
+                    comments: { freeFormComment: 'これは訓練モードによるデモ表示です。実際の地震・津波ではありません。' }
+                });
+                processLiveDataFromStore(false, true);
+                pushMonitorLog('訓練: EEW予報（554検知＋震度速報）を注入しました。詳細画面の「緊急地震速報」欄を確認してください。');
+                playChime('info');
             } else if (kind === 'tsunami') {
                 handleTsunami552({
                     code: 552,
@@ -2546,5 +2543,5 @@
 
         window.onload = initApp;
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5b58ec8fd4196a9',t:'MTc5NDgyMjI3Mw=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5b58ec8fd4196a9',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5ce63c6495396d0',t:'MTc5NTA4MjY1NQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5ce63c6495396d0',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
