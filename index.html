@@ -88,7 +88,7 @@
                     <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                         <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tight text-white truncate">ソナエール</h1>
                         <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full bg-red-600 text-white tracking-wider border border-red-400 shadow-sm animate-pulse shrink-0">LIVE</span>
-                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.7</button>
+                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.8</button>
                     </div>
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <!-- 緑のリアルタイム時計 -->
@@ -131,8 +131,8 @@
             <span id="tsunamiStateBadge" class="shrink-0 text-slate-400" title="津波警報・注意報の発表状況">津波 <span id="tsunamiStateValue" class="text-slate-400 font-bold">なし</span></span>
             <span id="lastAlertText" class="text-slate-500 hidden lg:inline truncate max-w-[300px]" title="最新のアラートログ">監視を開始しています…</span>
             <span class="flex-1"></span>
-            <button id="chimeToggleBtn" onclick="toggleChime()" data-on="true" class="monitor-toggle shrink-0" title="アラート音（Web Audio）のON/OFF">🔔 音</button>
-            <button id="autoSpeakToggleBtn" onclick="toggleAutoSpeak()" data-on="false" class="monitor-toggle shrink-0" title="緊急地震速報・津波の自動音声読上げ">📣 読上</button>
+            <button id="chimeToggleBtn" onclick="toggleChime()" data-on="true" class="monitor-toggle shrink-0" title="津波警報・大津波警報のアラート音（Web Audio）のON/OFF">🔔 音</button>
+            <button id="autoSpeakToggleBtn" onclick="toggleAutoSpeak()" data-on="false" class="monitor-toggle shrink-0" title="津波警報・大津波警報の自動音声読上げ">📣 読上</button>
             <button id="wakeLockToggleBtn" onclick="toggleWakeLock()" data-on="false" class="monitor-toggle shrink-0" title="画面スリープ防止（Wake Lock API）">🔆 常時ON</button>
             <button id="fullscreenToggleBtn" onclick="toggleFullscreen()" data-on="false" class="monitor-toggle shrink-0" title="フルスクリーン表示の切替">⛶ 全画面</button>
             <button id="demoModeBtn" onclick="toggleDemoMode()" data-on="false" class="monitor-toggle monitor-toggle-demo shrink-0" title="訓練モード: テスト用のEEW/津波/地震を手動発報できます（実報とは無関係です）">🧪 訓練</button>
@@ -271,7 +271,7 @@
         <div class="max-w-[1600px] mx-auto px-4 flex justify-center items-center gap-4 text-xs font-bold flex-wrap">
             <button onclick="openModal('guide')" class="text-slate-400 hover:text-white transition underline decoration-slate-600 underline-offset-4">利用規約・ガイドライン・情報取得元</button>
             <span class="text-slate-600">|</span>
-            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.7)</button>
+            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.8)</button>
         </div>
     </footer>
 
@@ -281,7 +281,7 @@
             <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900 shrink-0">
                 <div class="flex items-center gap-2 sm:gap-4">
                     <button id="tabBtnGuide" onclick="switchModalTab('guide')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-emerald-400 text-emerald-400 flex items-center gap-1.5 transition">🛡️ 利用規約・ガイドライン・取得元</button>
-                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.7)</button>
+                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.8)</button>
                 </div>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1 text-sm font-bold">✕ 閉じる</button>
             </div>
@@ -349,13 +349,28 @@
                     <!-- v5.0.5 -->
                     <!-- v5.0.6 -->
                     <!-- v5.0.7 -->
+                    <!-- v5.0.8 -->
                     <div class="bg-slate-900/60 p-4 rounded-lg border border-emerald-500/40 shadow">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
-                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.7</span>
-                                電文の並びを「発報時刻の新しい順」に修正（最新報を優先）
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.8</span>
+                                アラート音を「津波警報・大津波警報」専用へ（それ以外の効果音を廃止）
                             </span>
                             <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li><strong>津波警報・大津波警報のチャイム＋読上げは維持：</strong>津波警報（大津波警報含む）の受信時は、従来どおり専用チャイムと自動読上げ（「津波警報が発表されています。ただちに高台へ避難してください」）を発報します。</li>
+                            <li><strong>それ以外の効果音を廃止：</strong>津波注意報・津波警報解除・訓練の「EEW予報」「デモ地震」・アラート音トグルON時のフィードバック音を廃止しました。常時表示モニターの静穏性を優先し、音は「切迫した津波避難を促す場面」に限定しています。</li>
+                            <li><strong>文言の修正：</strong>自動読上ONの確認文言を「津波警報・大津波警報を受信した際に読み上げます」に、ツールチップも同様に更新しました。</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0.7</span>
+                                電文の並びを「発報時刻の新しい順」に修正（最新報を優先）
+                            </span>
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
                             <li><strong>同一地震の電文グループを「issue.time（発報時刻）の新しい順」へ修正：</strong>これまでは電文の到着順・履歴の取得順に依存してベース電文を選んでいたため、震度3以上の地震で「【第2報】震源決定 (震度は速報値)」のまま最終報（各地の震度に関する情報）へ切り替わらないことがありました。今後は常に最新の電文をベースにするため、震度速報→震源に関する情報→各地の震度に関する情報の順で正しく表示が更新されます。</li>
@@ -2256,7 +2271,6 @@
             if (announce) {
                 if (cancelled) {
                     pushMonitorLog('津波警報・注意報は解除されました');
-                    playChime('info');
                 } else if (areas.length > 0) {
                     const topGrade = TSUNAMI_GRADE[areas[0].grade] || TSUNAMI_GRADE.Unknown;
                     if (topGrade.rank >= 2) {
@@ -2264,8 +2278,6 @@
                         if (monitorSettings.autoSpeak) {
                             speakText(topGrade.label + 'が発表されています。海岸から離れ、ただちに高台へ避難してください。');
                         }
-                    } else {
-                        playChime('info');
                     }
                     pushMonitorLog(topGrade.label + 'を発表中（' + areas.length + '沿岸）');
                     triggerUpdateFlash();
@@ -2396,14 +2408,13 @@
         // ---------- モニター制御 (トグル) ----------
         function toggleChime() {
             monitorSettings.chime = !monitorSettings.chime;
-            if (monitorSettings.chime) playChime('info');
             saveMonitorSettings();
             pushMonitorLog(monitorSettings.chime ? 'アラート音をONにしました' : 'アラート音をOFFにしました');
         }
         function toggleAutoSpeak() {
             monitorSettings.autoSpeak = !monitorSettings.autoSpeak;
             saveMonitorSettings();
-            if (monitorSettings.autoSpeak) speakText('自動音声読み上げをONにしました。緊急地震速報を受信した際に読み上げます。');
+            if (monitorSettings.autoSpeak) speakText('自動音声読み上げをONにしました。津波警報・大津波警報を受信した際に読み上げます。');
             pushMonitorLog(monitorSettings.autoSpeak ? '自動読上をONにしました' : '自動読上をOFFにしました');
         }
         async function toggleWakeLock() {
@@ -2511,7 +2522,6 @@
                 });
                 processLiveDataFromStore(false, true);
                 pushMonitorLog('訓練: EEW予報（554検知＋震度速報）を注入しました。詳細画面の「緊急地震速報」欄を確認してください。');
-                playChime('info');
             } else if (kind === 'tsunami') {
                 handleTsunami552({
                     code: 552,
@@ -2541,11 +2551,10 @@
                 });
                 processLiveDataFromStore(false, true);
                 pushMonitorLog('訓練: デモ地震（福島県沖 M5.5 震度4）を発報しました');
-                playChime('info');
             }
         }
 
         window.onload = initApp;
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5ce7e8a5abd3b69',t:'MTc5NTA4Mzc1Mg=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5ce7e8a5abd3b69',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5ce915b5cceb34a',t:'MTc5NTA4NDUyMg=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5ce915b5cceb34a',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
