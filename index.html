@@ -88,7 +88,7 @@
                     <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                         <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tight text-white truncate">ソナエール</h1>
                         <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full bg-red-600 text-white tracking-wider border border-red-400 shadow-sm animate-pulse shrink-0">LIVE</span>
-                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.8</button>
+                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.10</button>
                     </div>
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <!-- 緑のリアルタイム時計 -->
@@ -271,7 +271,7 @@
         <div class="max-w-[1600px] mx-auto px-4 flex justify-center items-center gap-4 text-xs font-bold flex-wrap">
             <button onclick="openModal('guide')" class="text-slate-400 hover:text-white transition underline decoration-slate-600 underline-offset-4">利用規約・ガイドライン・情報取得元</button>
             <span class="text-slate-600">|</span>
-            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.8)</button>
+            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.10)</button>
         </div>
     </footer>
 
@@ -281,7 +281,7 @@
             <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900 shrink-0">
                 <div class="flex items-center gap-2 sm:gap-4">
                     <button id="tabBtnGuide" onclick="switchModalTab('guide')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-emerald-400 text-emerald-400 flex items-center gap-1.5 transition">🛡️ 利用規約・ガイドライン・取得元</button>
-                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.8)</button>
+                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.10)</button>
                 </div>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1 text-sm font-bold">✕ 閉じる</button>
             </div>
@@ -295,8 +295,8 @@
                             <p>本ポータル「ソナエール・ライブ」は、防災啓発・情報支援を目的として開発された非公式の地震情報ビューアーです。</p>
                             <ul class="space-y-1.5 list-disc list-inside text-slate-300 ml-1">
                                 <li><strong class="text-white">API配信基盤：</strong>気象庁が発表する防災気象情報（地震・津波に関する電文）を、「P2P地震情報 JSON API v2（p2pquake.net / 開発: たくや氏）」経由で取得し表示しています。地震（code 551）、津波警報・注意報・予報（code 552）、緊急地震速報・検知（code 554 / 556）、P2P参加ピア数（code 555）、ユーザー体感報告（code 561 / 9611）の各電文に対応しています。</li>
-                                <li><strong class="text-white">WebSocketリアルタイム配信：</strong>主たる取得経路は、WebSocket（wss://api.p2pquake.net/v2/ws）への常時接続です。地震・津波・緊急地震速報が発表されると、サーバーから電文が即時にプッシュ配信され、画面へ最速で反映されます（平常時に電文が流れないのは、このプッシュ方式の仕様です）。</li>
-                                <li><strong class="text-white">自動再接続・フォールバック：</strong>切断時は指数バックオフで自動的に再接続し、再接続のたびに、またタブへ戻った際に、HTTP「/v2/history」で最新状態を自動補完します。さらにWS監視中も5分ごとにHTTPで照合するフェイルセーフを備えています。ネットワーク環境によりWebSocketが接続できない場合は、HTTPポーリング（15秒／30秒／60秒）へ自動的に切り替わり、5分ごとにWS復旧を自動確認します。</li>
+                                <li><strong class="text-white">WebSocketリアルタイム配信：</strong>主たる取得経路は、WebSocket（wss://api.p2pquake.net/v2/ws）への常時接続です。地震・津波・緊急地震速報が発表されると、サーバーから電文が即時にプッシュ配信され、画面へ反映されます（平常時に電文が流れないのは、このプッシュ方式の仕様です）。なお、地震発生から気象庁の発表までは、緊急地震速報（警報）でも数秒〜十数秒、震度速報は約1分、震源に関する情報・各地の震度に関する情報は約1〜5分かかるため、発生から画面反映まではこの発表時間がそのままかかります（かつて本アプリが表記していた「最速約0.1秒」は誤りでした）。</li>
+                                <li><strong class="text-white">自動再接続・フォールバック：</strong>切断時は指数バックオフで自動的に再接続し、再接続のたびに、またタブへ戻った際に、HTTP「/v2/history」で最新状態を自動補完します。さらにWS監視中も60秒ごとにHTTPで照合するフェイルセーフを備えています（v5.0.9〜）。ネットワーク環境によりWebSocketが接続できない場合は、HTTPポーリング（15秒／30秒／60秒）へ自動的に切り替わり、5分ごとにWS復旧を自動確認します。</li>
                                 <li><strong class="text-white">緊急地震速報（予報・警報）の裏側処理：</strong>緊急地震速報は、画面上のパネル表示・専用アラート音・自動読上げは行いません。受信した電文はモニターバーのログへ静かに記録した上で、551（震度速報・震源情報）と発生時刻±90秒で自動相関し、該当する地震の詳細画面の「緊急地震速報」欄に、実際に発表された内容どおりに記載します（警報・code 556 →「【警報】（受信済・第N報）」、警報の取消 →「【警報】（発表後取消）」、予報の検知・code 554 →「【予報】（受信済）」）。EEWを受信したにもかかわらず観測された最大震度が震度3以下だった場合は、「緊急地震速報【予報】／【警報】」とだけ記載します。第N報の続報更新の検知（いずれも画面遷移・音声を伴わない裏側処理です）にも対応します。</li>
                                 <li><strong class="text-white">津波モニター（code 552）：</strong>大津波警報・津波警報・津波注意報の区分、対象沿岸、予想される高さ（巨大／高い／１０ｍ超など）、第1波到達予想（arrivalTime／「ただちに津波来襲と予測」等のcondition）、即時避難の呼びかけ、解除を表示します。地震詳細の津波情報は、気象庁電文中の domesticTsunami 等に基づく参考表示です。</li>
                                 <li><strong class="text-white">参考表示について：</strong>モニターバーに表示される「P2Pピア数」と「ユーザー体感報告（561 / 9611）」は、P2Pネットワークの状態とユーザーの体感の集計に基づく参考値であり、気象庁その他の公的機関による発表ではありません。</li>
@@ -349,16 +349,46 @@
                     <!-- v5.0.5 -->
                     <!-- v5.0.6 -->
                     <!-- v5.0.7 -->
-                    <!-- v5.0.8 -->
+                    <!-- v5.0.10 -->
                     <div class="bg-slate-900/60 p-4 rounded-lg border border-emerald-500/40 shadow">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
-                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.8</span>
-                                アラート音を「津波警報・大津波警報」専用へ（それ以外の効果音を廃止）
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.10</span>
+                                「地震発生から最速約0.1秒」表記の誤りを訂正（実態に即した説明へ）
                             </span>
                             <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li><strong>誤った速度表現を訂正：</strong>「地震発生から最速約0.1秒で画面反映」という表記は誤りでした。本アプリが即時に行えるのは「P2P地震情報が気象庁の発表電文を再配信してから、画面へ反映するまで」（通常1秒以内）です。</li>
+                            <li><strong>地震発生から発表までの実際の時間：</strong>緊急地震速報（警報）は発生後数秒〜十数秒、震度速報は約1分、震源に関する情報・各地の震度に関する情報は約1〜5分が目安です（気象庁資料に基づく）。発生から画面反映までは、この発表時間がそのままかかります。</li>
+                            <li><strong>修正した箇所：</strong>モニターバーのWS LIVEツールチップ、ガイド第1章、アップデート履歴の旧表記（v5.0.0・v5.0.9）を実態に即した表現へ修正しました。機能の変更はありません。</li>
+                        </ul>
+                    </div>
+
+                    <!-- v5.0.9 -->
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0.9</span>
+                                WS接続中の「情報が届くのが遅い」を改善（HTTP照合を60秒間隔へ）
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
+                            <li><strong>フェイルセーフ照合を5分→60秒へ短縮：</strong>WS監視中もHTTP「/v2/history」で551（地震）・552（津波）・554/556（EEW）を静かに照合する処理の間隔を5分おきから<strong>60秒おき</strong>に短縮しました。WSが「接続されたまま黙って応答しなくなる」サイレント故障の場合でも、最大約1分で最新情報へ自動的に追従します。</li>
+                            <li><strong>通常時の速さは変わりません：</strong>平常時はWSプッシュ（気象庁の発表電文を即時受信）が主経路のままです。照合は画面を不要に書き換えない静かな補完のため、チラつきや体感速度への影響はありません。</li>
+                            <li><strong>EEW・津波の取りこぼしも早期回収：</strong>照合ではEEW（554/556）と津波（552）も同時に再確認するため、WS側で電文が欠けた場合も約1分以内に詳細画面・津波パネルへ反映します。</li>
+                        </ul>
+                    </div>
+
+                    <!-- v5.0.8 -->
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0.8</span>
+                                アラート音を「津波警報・大津波警報」専用へ（それ以外の効果音を廃止）
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
                             <li><strong>津波警報・大津波警報のチャイム＋読上げは維持：</strong>津波警報（大津波警報含む）の受信時は、従来どおり専用チャイムと自動読上げ（「津波警報が発表されています。ただちに高台へ避難してください」）を発報します。</li>
                             <li><strong>それ以外の効果音を廃止：</strong>津波注意報・津波警報解除・訓練の「EEW予報」「デモ地震」・アラート音トグルON時のフィードバック音を廃止しました。常時表示モニターの静穏性を優先し、音は「切迫した津波避難を促す場面」に限定しています。</li>
                             <li><strong>文言の修正：</strong>自動読上ONの確認文言を「津波警報・大津波警報を受信した際に読み上げます」に、ツールチップも同様に更新しました。</li>
@@ -474,7 +504,7 @@
                             </span>
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
-                            <li><strong>WebSocketリアルタイム配信へ刷新（最速約0.1秒）：</strong>P2P地震情報のWebSocket API（wss://api.p2pquake.net/v2/ws）へ常時接続し、地震・津波・EEWの電文を受信した瞬間に画面へ反映。1秒毎のHTTPポーリングを廃止し、サーバー負荷とレート制限（60 req/min）の問題を解消しました。</li>
+                            <li><strong>WebSocketリアルタイム配信へ刷新（発表電文を即時受信）：</strong>P2P地震情報のWebSocket API（wss://api.p2pquake.net/v2/ws）へ常時接続し、地震・津波・EEWの電文を受信した瞬間に画面へ反映。1秒毎のHTTPポーリングを廃止し、サーバー負荷とレート制限（60 req/min）の問題を解消しました。</li>
                             <li><strong>自動再接続 ＆ 欠損補完：</strong>切断時は指数バックオフ（1s→2s→4s…最大30s＋ジッター）で自動再接続。readyState監視のwatchdog、タブ復帰時の自動再接続、再接続時のHTTP /v2/historyによる551/552/556の欠損自動補完を搭載。HTTPポーリング（15/30/60秒）へ手動切替も可能です。</li>
                             <li><strong>緊急地震速報（警報）= code 556 の実報対応：</strong>実際のEEW電文を受信すると専用アラートパネルが起動し、震源・M・深さ・発生時刻・予想震度地域（scaleTo）・到達状況（未到達／到達／PLUM法=kindCode）を即時表示。第N報の続報更新・取消（cancelled）に対応。code 554（EEW検知）もログ通知します。</li>
                             <li><strong>EEWと震度速報の実相関（空振り判定）：</strong>551と556を発生時刻±90秒で自動相関し、実際にEEWが発表された地震のみ「受信済」と表示。EEW受信後に観測震度が震度3以下だった場合は「空振り（誤報）」バナーを実報ベースで表示します（従来は震度だけの推測でした）。</li>
@@ -1756,7 +1786,6 @@
             modal.classList.remove('flex');
         }
 
-
         // ============================================================
         // v5.0 リアルタイム監視エンジン (WebSocket + EEW/津波 速報)
         // ============================================================
@@ -1903,7 +1932,7 @@
                 }
             };
             if (next === 'open') {
-                apply('w-2 h-2 rounded-full bg-emerald-400 ws-live-dot inline-block', 'WS LIVE', 'WebSocket接続中 (wss://api.p2pquake.net/v2/ws) 地震発生から約0.1秒で反映します', 'WS 接続', 'text-emerald-400');
+                apply('w-2 h-2 rounded-full bg-emerald-400 ws-live-dot inline-block', 'WS LIVE', 'WebSocket接続中 (wss://api.p2pquake.net/v2/ws) 気象庁の発表電文をP2P地震情報経由で受信した瞬間に反映します（発生からの反映には気象庁の発表時間がかかります）', 'WS 接続', 'text-emerald-400');
             } else if (next === 'connecting') {
                 apply('w-2 h-2 rounded-full bg-amber-400 animate-pulse inline-block', 'WS 接続中…', 'WebSocketサーバーへ接続しています', '接続中…', 'text-amber-400');
             } else if (next === 'reconnecting') {
@@ -2074,12 +2103,13 @@
             probe.onclose = function () { finish(false); };
         }
 
-        // WS監視中も5分おきにHTTPで静かに最新状態と照合する（電文の取りこぼし対策のフェイルセーフ）
+        // WS監視中も60秒おきにHTTPで静かに最新状態と照合する（電文の取りこぼし対策のフェイルセーフ）
+        // WSが「接続されたまま黙って応答しなくなる」サイレント故障でも、最大約1分で最新情報へ追従する
         function startWsReconcileLoop() {
             stopWsReconcileLoop();
             wsReconcileTimer = setInterval(function () {
                 if (currentMode === 'ws') backfillFromHttp();
-            }, 5 * 60 * 1000);
+            }, 60 * 1000);
         }
         function stopWsReconcileLoop() {
             clearInterval(wsReconcileTimer);
@@ -2556,5 +2586,5 @@
 
         window.onload = initApp;
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5ce915b5cceb34a',t:'MTc5NTA4NDUyMg=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5ce915b5cceb34a',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5d7dd2c8ab2118c',t:'MTc5NTE4MjAwMA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5d7dd2c8ab2118c',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
