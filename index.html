@@ -93,7 +93,7 @@
                     <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                         <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tight text-white truncate">ソナエール</h1>
                         <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full bg-red-600 text-white tracking-wider border border-red-400 shadow-sm animate-pulse shrink-0">LIVE</span>
-                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.26</button>
+                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.27</button>
                     </div>
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <!-- 緑のリアルタイム時計 -->
@@ -287,7 +287,7 @@
         <div class="max-w-[1600px] mx-auto px-4 flex justify-center items-center gap-4 text-xs font-bold flex-wrap">
             <button onclick="openModal('guide')" class="text-slate-400 hover:text-white transition underline decoration-slate-600 underline-offset-4">利用規約・ガイドライン・情報取得元</button>
             <span class="text-slate-600">|</span>
-            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.26)</button>
+            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.27)</button>
         </div>
     </footer>
 
@@ -297,7 +297,7 @@
             <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900 shrink-0">
                 <div class="flex items-center gap-2 sm:gap-4">
                     <button id="tabBtnGuide" onclick="switchModalTab('guide')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-emerald-400 text-emerald-400 flex items-center gap-1.5 transition">🛡️ 利用規約・ガイドライン・取得元</button>
-                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.26)</button>
+                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.27)</button>
                 </div>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1 text-sm font-bold">✕ 閉じる</button>
             </div>
@@ -365,14 +365,30 @@
                     <!-- v5.0.5 -->
                     <!-- v5.0.6 -->
                     <!-- v5.0.7 -->
-                    <!-- v5.0.26 -->
+                    <!-- v5.0.27 -->
                     <div class="bg-slate-900/60 p-4 rounded-lg border border-emerald-500/40 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.27</span>
+                                ⏱️ 気象庁へのアクセスを5分ごとに
+                            </span>
+                            <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li>気象庁の緊急地震速報 発表一覧の自動取得を<b>10分ごと → 5分ごと</b>に変更しました（起動時・5分ごと・地震検知の約5分後の計3系統）。</li>
+                            <li>気象庁へアクセスするのは<b>この発表一覧の2ページのみ</b>で、地震情報・津波・EEWの実電文はすべてP2P地震情報から取得しています。</li>
+                            <li>公表ページは CloudFront のキャッシュ（<code>cache-control: max-age=600</code>）配信のため、5分間隔でも気象庁のサーバーへ直接負荷はかかりません。</li>
+                        </ul>
+                    </div>
+
+                    <!-- v5.0.26 -->
+                    <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/60 shadow">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
                                 <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.26</span>
                                 🧹 発表されていない地震に「【予報】」と書く推測をやめました
                             </span>
-                            <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
+                            
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
                             <li>「M3.5以上または震度3以上なら予報が出ているはず」という<b>推測で「緊急地震速報【予報】」と表示していた処理を撤去</b>しました。気象庁の予報は推定Mなどで発表されるため、確定したM・震度から判定できないためです（実際の予報一覧には M1.0・M2.8・震度1 の地震も掲載されています）。</li>
@@ -409,7 +425,7 @@
                             
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
-                            <li>同梱の照合テーブル（427件）に加えて、<b>気象庁の公表ページを起動時と10分ごとに自動取得</b>するようにしました。今後あたらしい地震で予報・警報が出ても、回線がつながっていれば自動で反映されます。</li>
+                            <li>同梱の照合テーブル（427件）に加えて、<b>気象庁の公表ページを起動時と5分ごとに自動取得</b>するようにしました。今後あたらしい地震で予報・警報が出ても、回線がつながっていれば自動で反映されます。</li>
                             <li>地震を検知したときは、気象庁の公表が反映される頃（<b>約5分後</b>）にも一度だけ取り直します。</li>
                             <li>回線が無い・取得に失敗した場合は、同梱の427件でそのまま動作します（機能は止まりません）。</li>
                             <li>動作の流れ：① P2P地震情報の電文（code 554／556）を受信 → 即時反映 ② 電文を取りこぼした場合 → 気象庁の公表一覧と照合 ③ どちらにも無い場合 → 「発表なし（基準以下）」。</li>
@@ -3983,8 +3999,8 @@
             initApp();
             // 気象庁の緊急地震速報 発表一覧を起動時と60分ごとに最新化（失敗しても同梱テーブルで動作）
             refreshJmaEewTable(false);
-            setInterval(function () { refreshJmaEewTable(true); }, 10 * 60 * 1000);
+            setInterval(function () { refreshJmaEewTable(true); }, 5 * 60 * 1000);
         };
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5e0a7e0ed8f96b8',t:'MTc5NTI3NDE4OA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5e0a7e0ed8f96b8',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5e0b4ae38472b2f',t:'MTc5NTI3NDcxMw=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5e0b4ae38472b2f',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
