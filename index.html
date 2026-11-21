@@ -93,7 +93,7 @@
                     <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                         <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tight text-white truncate">ソナエール</h1>
                         <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full bg-red-600 text-white tracking-wider border border-red-400 shadow-sm animate-pulse shrink-0">LIVE</span>
-                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.24</button>
+                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.25</button>
                     </div>
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <!-- 緑のリアルタイム時計 -->
@@ -287,7 +287,7 @@
         <div class="max-w-[1600px] mx-auto px-4 flex justify-center items-center gap-4 text-xs font-bold flex-wrap">
             <button onclick="openModal('guide')" class="text-slate-400 hover:text-white transition underline decoration-slate-600 underline-offset-4">利用規約・ガイドライン・情報取得元</button>
             <span class="text-slate-600">|</span>
-            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.24)</button>
+            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.25)</button>
         </div>
     </footer>
 
@@ -365,14 +365,31 @@
                     <!-- v5.0.5 -->
                     <!-- v5.0.6 -->
                     <!-- v5.0.7 -->
-                    <!-- v5.0.24 -->
+                    <!-- v5.0.25 -->
                     <div class="bg-slate-900/60 p-4 rounded-lg border border-emerald-500/40 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.25</span>
+                                📩 受信した予報を、あとから出る地震情報へ確実に引き継ぐ
+                            </span>
+                            <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li>緊急地震速報（予報・code 554）を受信すると、その約1〜20分後に発表される地震情報（code 551）に<b>「緊急地震速報【予報】」を引き継いで表示</b>します（発生時刻±90秒・震央地名で照合）。震度2でも表示されます。</li>
+                            <li>受信した予報はブラウザに保存（localStorage・6時間）するようにしました。<b>ページを再読み込みしたり、地震情報が遅れて届いても</b>予報の受信を忘れません。</li>
+                            <li>起動時に予報の履歴を最大20件（6時間分）まで読み戻します（従来は5件・3時間分）。</li>
+                            <li>優先順位：① 警報（code 556）→「【警報】」／② 警報の取消 →「【警報】（発表後取消）」／③ 予報（code 554）→「【予報】」／④ 気象庁の公表一覧 →「【警報】／【予報】」／⑤ どれも無い →「発表なし（基準以下）」。</li>
+                        </ul>
+                    </div>
+
+                    <!-- v5.0.24 -->
+                    <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/60 shadow">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
                                 <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.24</span>
                                 🔄 緊急地震速報の発表一覧を自動で最新化
                             </span>
-                            <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
+                            
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
                             <li>同梱の照合テーブル（427件）に加えて、<b>気象庁の公表ページを起動時と10分ごとに自動取得</b>するようにしました。今後あたらしい地震で予報・警報が出ても、回線がつながっていれば自動で反映されます。</li>
@@ -3514,12 +3531,12 @@
                     applyTsunami552(latest, false);
                 }
             });
-            fetchJsonQuiet(HTTP_HISTORY + '?codes=554&limit=5').then(function (rows) {
+            fetchJsonQuiet(HTTP_HISTORY + '?codes=554&limit=20').then(function (rows) {
                 let added = 0;
                 (rows || []).forEach(function (row) {
                     if (!row || !row.id) return;
                     const t = parseJstTime(row.time || 0).getTime();
-                    if (isNaN(t) || Date.now() - t >= 3 * 3600 * 1000) return;
+                    if (isNaN(t) || Date.now() - t >= 6 * 3600 * 1000) return;
                     if (!eewDetections.some(function (d) { return d.id === row.id; })) added = added + 1;
                     storeEewDetection(row);
                 });
@@ -3547,14 +3564,33 @@
             });
             return m;
         }
+        const EEW_DET_KEY = 'sonaeru_eew_detections_v1';
+        function saveEewDetections() {
+            try { safeStorageSet(EEW_DET_KEY, JSON.stringify(eewDetections.slice(-60))); } catch (e) { /* 非永続環境 */ }
+        }
+        function loadEewDetections() {
+            try {
+                const raw = safeStorageGet(EEW_DET_KEY);
+                if (!raw) return;
+                const arr = JSON.parse(raw);
+                if (Array.isArray(arr)) {
+                    const now = Date.now();
+                    eewDetections = arr.filter(function (d) {
+                        const t = parseJstTime(d && d.time || 0).getTime();
+                        return !isNaN(t) && now - t < 6 * 3600 * 1000;
+                    });
+                }
+            } catch (e) { /* 壊れていたら無視 */ }
+        }
         function storeEewDetection(msg) {
             if (!msg || !msg.id) return;
             const det = { id: msg.id, time: msg.time || null, type: msg.type || '', receivedAt: Date.now() };
             for (let i = 0; i < eewDetections.length; i = i + 1) {
-                if (eewDetections[i].id === det.id) { eewDetections[i] = det; return; }
+                if (eewDetections[i].id === det.id) { eewDetections[i] = det; saveEewDetections(); return; }
             }
             eewDetections.push(det);
             if (eewDetections.length > 60) eewDetections = eewDetections.slice(eewDetections.length - 60);
+            saveEewDetections();
         }
         function findEewDetectionForTime(ms) {
             if (!ms || isNaN(ms)) return null;
@@ -3928,11 +3964,12 @@
         }
 
         window.onload = function () {
+            loadEewDetections();
             initApp();
             // 気象庁の緊急地震速報 発表一覧を起動時と60分ごとに最新化（失敗しても同梱テーブルで動作）
             refreshJmaEewTable(false);
             setInterval(function () { refreshJmaEewTable(true); }, 10 * 60 * 1000);
         };
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5de3006baeed3fd',t:'MTc5NTI0ODMwOA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5de3006baeed3fd',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5de3743fd82cffb',t:'MTc5NTI0ODYwNA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5de3743fd82cffb',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
