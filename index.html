@@ -88,7 +88,7 @@
                     <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                         <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tight text-white truncate">ソナエール</h1>
                         <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full bg-red-600 text-white tracking-wider border border-red-400 shadow-sm animate-pulse shrink-0">LIVE</span>
-                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.10</button>
+                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.13</button>
                     </div>
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <!-- 緑のリアルタイム時計 -->
@@ -271,7 +271,7 @@
         <div class="max-w-[1600px] mx-auto px-4 flex justify-center items-center gap-4 text-xs font-bold flex-wrap">
             <button onclick="openModal('guide')" class="text-slate-400 hover:text-white transition underline decoration-slate-600 underline-offset-4">利用規約・ガイドライン・情報取得元</button>
             <span class="text-slate-600">|</span>
-            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.10)</button>
+            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.13)</button>
         </div>
     </footer>
 
@@ -281,7 +281,7 @@
             <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900 shrink-0">
                 <div class="flex items-center gap-2 sm:gap-4">
                     <button id="tabBtnGuide" onclick="switchModalTab('guide')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-emerald-400 text-emerald-400 flex items-center gap-1.5 transition">🛡️ 利用規約・ガイドライン・取得元</button>
-                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.10)</button>
+                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.13)</button>
                 </div>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1 text-sm font-bold">✕ 閉じる</button>
             </div>
@@ -349,16 +349,63 @@
                     <!-- v5.0.5 -->
                     <!-- v5.0.6 -->
                     <!-- v5.0.7 -->
-                    <!-- v5.0.10 -->
+                    <!-- v5.0.13 -->
                     <div class="bg-slate-900/60 p-4 rounded-lg border border-emerald-500/40 shadow">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
-                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.10</span>
-                                「地震発生から最速約0.1秒」表記の誤りを訂正（実態に即した説明へ）
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.13</span>
+                                🔊音声読上の地域読み上げを「気象庁の震度観測地域」名へ
                             </span>
                             <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li><strong>震度観測地域名で読み上げ：</strong>🔊「音声読上」の地域部分を、気象庁が震度速報などで発表する<strong>震度観測地域名</strong>（全国188区域。例：「熊本県天草・芦北」「宮崎県南部平野部」「福島県浜通り」など）で読み上げるようにしました。</li>
+                            <li><strong>実データから取得：</strong>電文グループ全体（震度速報を含む全報）に含まれる isArea ポイントを集約し、地域ごとの最新の震度を採用しています。震度が高い順→震度3まで、の構成はv5.0.11から変更ありません。</li>
+                            <li><strong>過去アーカイブの扱い：</strong>内蔵アーカイブには震度観測地域データが無いため、その場合のみ従来どおり都道府県名を列挙します（ライブの電文経路では震度速報を経た地域があれば地域名になります）。</li>
+                            <li><strong>地方単位読み上げの廃止：</strong>v5.0.12で導入した「地方単位」読み上げは廃止しました。</li>
+                        </ul>
+                    </div>
+
+                    <!-- v5.0.12 -->
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0.12</span>
+                                🔊音声読上の地域読み上げを都道府県単位 → 地方単位へ
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
+                            <li><strong>地方単位で読み上げ：</strong>「この地震で最大震度〇を、…で観測しました」の地域名を、都道府県の列挙から<strong>地方名</strong>（北海道／東北地方／関東地方／中部地方／近畿地方／中国地方／四国地方／九州地方／沖縄地方）へ変更しました。大規模地震で読み上げが極端に長くなることを防ぎます。</li>
+                            <li><strong>地方区分：</strong>一般的な地方区分に基づきます（関東＝1都6県、中部＝新潟・富山・石川・福井・山梨・長野・岐阜・静岡・愛知・三重、沖縄は九州に含めず独立）。地方は北から南の順に読み上げます。</li>
+                            <li><strong>その他は変更なし：</strong>文言の構成（午前／午後の時刻表記・津波の読み分け・震度3まで・高震度順）はv5.0.11のままです。</li>
+                        </ul>
+                    </div>
+
+                    <!-- v5.0.11 -->
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0.11</span>
+                                🔊音声読上の読み上げ文を気象庁発表体へ全面刷新
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
+                            <li><strong>文言を発表体へ作り替え：</strong>🔊「音声読上」の読み上げ文を、「地震情報。午前／午後〇時〇分頃、最大震度〇を観測する地震がありました。…」という気象庁の発表に近い形式へ全面的に書き換えました。発生時刻は午前／午後表記（JST）で読み上げます。</li>
+                            <li><strong>震度3以上の地震では震度の高い地域から順に：</strong>「この地震で最大震度〇を、〇〇で観測しました。」に続けて、「また、最大震度〇を、〇〇で観測しています。」を、震度が高いほうから順に〈震度3まで〉読み上げます。地域名は都道府県単位です（v5.0.12で地方単位へ変更）。</li>
+                            <li><strong>津波の読み分け：</strong>津波注意報・津波警報・大津波警報を発表中の場合は「〇〇を発表中です。」、それ以外は「この地震による津波の心配はありません。」と読み上げます。過去のアーカイブでは「この地震では〇〇が発表されました。」と過去形になります。</li>
+                            <li><strong>対象範囲：</strong>変更対象は🔊手動読上げのみです。津波警報・大津波警報の自動読上げ文言、およびEEWを読み上げない仕様は従来どおりです。</li>
+                        </ul>
+                    </div>
+
+                    <!-- v5.0.10 -->
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0.10</span>
+                                「地震発生から最速約0.1秒」表記の誤りを訂正（実態に即した説明へ）
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
                             <li><strong>誤った速度表現を訂正：</strong>「地震発生から最速約0.1秒で画面反映」という表記は誤りでした。本アプリが即時に行えるのは「P2P地震情報が気象庁の発表電文を再配信してから、画面へ反映するまで」（通常1秒以内）です。</li>
                             <li><strong>地震発生から発表までの実際の時間：</strong>緊急地震速報（警報）は発生後数秒〜十数秒、震度速報は約1分、震源に関する情報・各地の震度に関する情報は約1〜5分が目安です（気象庁資料に基づく）。発生から画面反映までは、この発表時間がそのままかかります。</li>
                             <li><strong>修正した箇所：</strong>モニターバーのWS LIVEツールチップ、ガイド第1章、アップデート履歴の旧表記（v5.0.0・v5.0.9）を実態に即した表現へ修正しました。機能の変更はありません。</li>
@@ -1235,6 +1282,24 @@
                 const reports = groupedMap.get(key);
                 if (!reports || reports.length === 0) continue;
 
+                // 震度速報（ScalePrompt）の isArea ポイント＝気象庁の震度観測地域名を電文グループ全体から集約する。
+                // reports は issue.time 降順（最新報が先頭）なので、同一地域は最新報の震度を優先する。
+                const areaMaxMap = {};
+                for (let rr = 0; rr < reports.length; rr = rr + 1) {
+                    const rp = reports[rr].points || [];
+                    for (let ii = 0; ii < rp.length; ii = ii + 1) {
+                        const apt = rp[ii];
+                        if (!apt || !apt.isArea) continue;
+                        const aName = String(apt.addr || '').trim();
+                        if (!aName) continue;
+                        const aScale = apt.scale != null ? apt.scale : -1;
+                        if (!areaMaxMap[aName]) {
+                            areaMaxMap[aName] = { name: aName, scale: aScale };
+                        }
+                    }
+                }
+                const areasList = Object.keys(areaMaxMap).map(function (k) { return areaMaxMap[k]; });
+
                 // 最新の電文をベースにする
                 const latestItem = reports[0];
                 const baseItem = JSON.parse(JSON.stringify(latestItem));
@@ -1419,7 +1484,8 @@
                     scaleLabel: scaleObj.label,
                     scaleClass: scaleObj.cls,
                     scaleValue: scaleVal,
-                    pointsData: parsedPoints
+                    pointsData: parsedPoints,
+                    areasData: areasList
                 });
             }
 
@@ -1739,15 +1805,99 @@
             }
             if (!targetEq) return;
             window.speechSynthesis.cancel();
-            
-            let typeStr = targetEq.isHistorical ? "過去の地震記録です。" : (targetEq.isScalePrompt ? "第1報、震度速報です。" : (targetEq.isInheritedPoints || targetEq.reportType === "Destination" ? "第2報、震源に関する情報です。各地の震度は速報値です。" : (targetEq.isForeign ? "遠地地震に関する情報です。" : "最新の地震情報です。")));
-            let subTypeStr = targetEq.isSubShock ? "この地震は " + targetEq.subShockType + " とみられます。" : "";
-            
-            let textToRead = typeStr + "発生時刻、" + targetEq.time + "。" 
-                           + "震源地、" + targetEq.location + "。" + subTypeStr
-                           + "最大" + targetEq.scaleLabel + "。" + "マグニチュード、" + targetEq.magnitude + "。"
-                           + "震源の深さ、" + targetEq.depth + "。" + "緊急地震速報、" + targetEq.eewStatus + "。"
-                           + "津波情報、" + targetEq.tsunami + "。";
+
+            const sentences = [];
+            sentences.push('地震情報。');
+
+            // 発生時刻（JST固定・午前/午後H時M分頃）
+            const ts = (typeof targetEq.timestamp === 'number' && !isNaN(targetEq.timestamp)) ? targetEq.timestamp : parseJstTime(targetEq.time || '').getTime();
+            const t = new Date((isNaN(ts) ? Date.now() : ts) + 9 * 3600 * 1000);
+            const h24 = t.getUTCHours();
+            const ampm = h24 < 12 ? '午前' : '午後';
+            const h12 = h24 % 12;
+            const timeStr = ampm + h12 + '時' + t.getUTCMinutes() + '分頃';
+            if (targetEq.scaleValue >= 10) {
+                sentences.push(timeStr + '、最大' + targetEq.scaleLabel + 'を観測する地震がありました。');
+            } else {
+                sentences.push(timeStr + '、地震がありました。');
+            }
+
+            // 津波（発表中なら種別を、それ以外は心配なし）
+            let tsuLevel = null;
+            if (tsunamiState && !tsunamiState.cancelled && tsunamiState.areas && tsunamiState.areas.length > 0) {
+                const top = TSUNAMI_GRADE[tsunamiState.areas[0].grade] || TSUNAMI_GRADE.Unknown;
+                if (top.rank >= 1) tsuLevel = top.label;
+            }
+            if (!tsuLevel && targetEq.tsunami) {
+                const s = String(targetEq.tsunami);
+                if (s.indexOf('大津波警報') !== -1) tsuLevel = '大津波警報';
+                else if (s.indexOf('津波警報') !== -1) tsuLevel = '津波警報';
+                else if (s.indexOf('津波注意報') !== -1) tsuLevel = '津波注意報';
+            }
+            if (tsuLevel) {
+                sentences.push(targetEq.isHistorical ? 'この地震では' + tsuLevel + 'が発表されました。' : tsuLevel + 'を発表中です。');
+            } else {
+                sentences.push('この地震による津波の心配はありません。');
+            }
+
+            // 震源地
+            const loc = String(targetEq.location || '不明').replace(/\s+/g, '');
+            sentences.push('震源地は、' + loc + '。');
+
+            // 震源の深さ（ごく浅い／数値キロ／調査中・不明）
+            const dRaw = String(targetEq.depth || '').replace(/\s+/g, '');
+            let depthStr;
+            if (dRaw.indexOf('ごく浅い') !== -1) depthStr = 'ごく浅い';
+            else if (dRaw.indexOf('調査中') !== -1 || dRaw.indexOf('不明') !== -1) depthStr = dRaw;
+            else depthStr = dRaw.replace('km', 'キロ');
+            sentences.push('震源の深さは、' + depthStr + '。');
+
+            // マグニチュード
+            const mRaw = String(targetEq.magnitude || '').replace(/\s+/g, '');
+            if (mRaw.charAt(0) === 'M') {
+                sentences.push('地震の規模を示すマグニチュードは、' + mRaw.slice(1) + 'と推定されています。');
+            } else {
+                sentences.push('地震の規模を示すマグニチュードは、' + mRaw + 'です。');
+            }
+
+            // 震度3以上の地震のみ: 震度が高い地域から順に、震度3まで読み上げる
+            if (targetEq.scaleValue >= 30 && Array.isArray(targetEq.pointsData) && targetEq.pointsData.length > 0) {
+                const groups = targetEq.pointsData.slice().sort(function (a, b) { return b.scaleValue - a.scaleValue; });
+                let first = true;
+                for (let gi = 0; gi < groups.length; gi = gi + 1) {
+                    const g = groups[gi];
+                    if (!g || g.scaleValue < 30) break;
+                    let nameList = null;
+                    if (Array.isArray(targetEq.areasData) && targetEq.areasData.length > 0) {
+                        const matched = targetEq.areasData.filter(function (a) { return a.scale === g.scaleValue; });
+                        if (matched.length > 0) {
+                            const withIdx = matched.map(function (a) {
+                                let pref = null;
+                                for (let pi = 0; pi < PREF_ORDER.length; pi = pi + 1) {
+                                    if (a.name.indexOf(PREF_ORDER[pi]) === 0) { pref = PREF_ORDER[pi]; break; }
+                                }
+                                if (!pref) pref = '北海道'; // 北海道の地域名は都道府県名を含まない
+                                return { n: a.name, idx: getPrefIndex(pref) };
+                            });
+                            withIdx.sort(function (a, b) { return a.idx - b.idx; });
+                            nameList = withIdx.map(function (o) { return o.n; });
+                        }
+                    }
+                    if (!nameList) {
+                        nameList = (g.prefectures || []).map(function (p) { return p.prefName; });
+                    }
+                    const prefStr = nameList.join('、');
+                    const where = prefStr ? prefStr + 'で' : '';
+                    if (first) {
+                        sentences.push('この地震で最大' + g.scaleLabel + 'を、' + where + '観測しました。');
+                        first = false;
+                    } else {
+                        sentences.push('また、最大' + g.scaleLabel + 'を、' + where + '観測しています。');
+                    }
+                }
+            }
+
+            const textToRead = sentences.join(' ');
             const msg = new SpeechSynthesisUtterance(textToRead);
             msg.lang = 'ja-JP';
             msg.rate = 1.1;
@@ -2586,5 +2736,5 @@
 
         window.onload = initApp;
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5d7dd2c8ab2118c',t:'MTc5NTE4MjAwMA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5d7dd2c8ab2118c',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5dcd73d8c0a319f',t:'MTc5NTIzNDE4NQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5dcd73d8c0a319f',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
