@@ -381,7 +381,7 @@
                             <li>余震・前震の項目を選ぶと「この地震は『◯◯』の余震です」と表示し、<b>本震の詳細へ戻るボタン</b>で行き来できます。</li>
                             <li>既存の能登半島地震（前震1・余震2）・熊本地震2016（前震3・余震2）・東日本大震災（前震1・余震3）・中越地震（余震3）・福岡県西方沖（余震1）・胆振東部地震（余震2）・福島県沖2022（前震1）も同じ系列表示になりました。</li>
                             <li>余震・前震の各項目にも<b>震源位置（緯度/経度）・緊急地震速報・津波情報</b>を収録しました（例：最大余震 M6.1 は北緯32.4°／東経130.5°・緊急地震速報【警報】・津波注意報発表）。</li>
-                            <li>緊急地震速報の欄を、気象庁の発表どおり<b>【警報】／【予報】</b>で区別しました（新規13件では、警報の発表は 7/28 17:08・7/29 22:19・7/2 15:26・7/6 14:07 の4件。残り9件は<b>予報のみ</b>で警報は未発表）。予報の場合は「警報（強い揺れの予想）は未発表」と注記します。2007年10月の警報運用開始前の地震は「制度開始前」と表示します。</li>
+                            <li>緊急地震速報の欄を、気象庁の発表どおり<b>【警報】／【予報】</b>で区別しました（新規13件では、警報の発表は 7/28 17:08・7/29 22:19・7/2 15:26・7/6 14:07 の4件。残り9件は<b>予報のみ</b>で警報は未発表）。2007年10月の警報運用開始前の地震は「制度開始前」と表示します。</li>
                         </ul>
                     </div>
 
@@ -2246,7 +2246,7 @@
             if (eewNoteEl) {
                 const note = targetEq.eewNote
                     || (targetEq.eewStatus.indexOf("【予報】") !== -1
-                        ? "警報（強い揺れの予想）は未発表。予報の規模＝M3.5以上または最大震度3以上"
+                        ? "警報（強い揺れの予想）は未発表"
                         : "");
                 if (note) {
                     eewNoteEl.textContent = note;
@@ -3370,5 +3370,5 @@
 
         window.onload = initApp;
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5de1032da6796b0',t:'MTc5NTI0NzAwNA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5de1032da6796b0',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5de1b89a980b175',t:'MTc5NTI0NzQ2OQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5de1b89a980b175',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
