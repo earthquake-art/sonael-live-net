@@ -93,7 +93,7 @@
                     <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                         <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tight text-white truncate">ソナエール</h1>
                         <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full bg-red-600 text-white tracking-wider border border-red-400 shadow-sm animate-pulse shrink-0">LIVE</span>
-                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.23</button>
+                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.24</button>
                     </div>
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <!-- 緑のリアルタイム時計 -->
@@ -287,7 +287,7 @@
         <div class="max-w-[1600px] mx-auto px-4 flex justify-center items-center gap-4 text-xs font-bold flex-wrap">
             <button onclick="openModal('guide')" class="text-slate-400 hover:text-white transition underline decoration-slate-600 underline-offset-4">利用規約・ガイドライン・情報取得元</button>
             <span class="text-slate-600">|</span>
-            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.23)</button>
+            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.24)</button>
         </div>
     </footer>
 
@@ -365,14 +365,31 @@
                     <!-- v5.0.5 -->
                     <!-- v5.0.6 -->
                     <!-- v5.0.7 -->
-                    <!-- v5.0.23 -->
+                    <!-- v5.0.24 -->
                     <div class="bg-slate-900/60 p-4 rounded-lg border border-emerald-500/40 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.24</span>
+                                🔄 緊急地震速報の発表一覧を自動で最新化
+                            </span>
+                            <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li>同梱の照合テーブル（427件）に加えて、<b>気象庁の公表ページを起動時と10分ごとに自動取得</b>するようにしました。今後あたらしい地震で予報・警報が出ても、回線がつながっていれば自動で反映されます。</li>
+                            <li>地震を検知したときは、気象庁の公表が反映される頃（<b>約5分後</b>）にも一度だけ取り直します。</li>
+                            <li>回線が無い・取得に失敗した場合は、同梱の427件でそのまま動作します（機能は止まりません）。</li>
+                            <li>動作の流れ：① P2P地震情報の電文（code 554／556）を受信 → 即時反映 ② 電文を取りこぼした場合 → 気象庁の公表一覧と照合 ③ どちらにも無い場合 → 「発表なし（基準以下）」。</li>
+                        </ul>
+                    </div>
+
+                    <!-- v5.0.23 -->
+                    <div class="bg-slate-900/60 p-4 rounded-lg border border-slate-700/60 shadow">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
                                 <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.23</span>
                                 ⚡ 緊急地震速報の区分を気象庁の公表どおりに表示
                             </span>
-                            <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
+                            
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
                             <li>WebSocketで実電文を受け取れなかった地震でも、<b>気象庁が実際に発表した区分（【警報】／【予報】）</b>を表示するようにしました。これまでは観測震度から推測して「発表なし（基準以下）」と誤表示する場合がありました（例：2026/11/21 12:17 熊本県天草・芦北地方 M3.0 震度2 は<b>予報を発表済み</b>）。</li>
@@ -844,10 +861,70 @@
             return idx === -1 ? 999 : idx;
         }
 
+        // ===== 気象庁の公表一覧を最新化する（起動時＋定期）=====
+        // 予報: fc_hist/index.html（直近約1か月）／警報: pub_hist/index.html（2008年〜）
+        // どちらも Access-Control-Allow-Origin: * のためブラウザから直接取得できる
+        const JMA_EEW_SOURCES = [
+            { url: "https://www.data.jma.go.jp/eew/data/nc/fc_hist/index.html", kind: "予報" },
+            { url: "https://www.data.jma.go.jp/eew/data/nc/pub_hist/index.html", kind: "警報" }
+        ];
+        let jmaEewLastSync = 0;
+        let jmaEewSyncCount = 0;
+        function parseJmaEewHtml(htmlText) {
+            const out = [];
+            const rowRe = /<tr[^>]*>([\s\S]*?)<\/tr>/g;
+            let m;
+            while ((m = rowRe.exec(htmlText)) !== null) {
+                const cells = m[1].match(/<td[^>]*>[\s\S]*?<\/td>/g);
+                if (!cells || cells.length < 2) continue;
+                const strip = (c) => c.replace(/<[^>]+>/g, '').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
+                const t = strip(cells[0]);
+                if (!/^\d{4}\/\d{2}\/\d{2} \d{2}:\d{2}$/.test(t)) continue;
+                const place = strip(cells[1]);
+                if (place) out.push([t, place]);
+            }
+            return out;
+        }
+        // 地震を検知したら、気象庁の公表が反映される頃（5分後）に一度だけ取り直す
+        let jmaEewOneShotTimer = null;
+        let jmaEewOneShotAt = 0;
+        function scheduleJmaEewRefresh() {
+            if (jmaEewOneShotTimer) return;
+            jmaEewOneShotAt = Date.now();
+            jmaEewOneShotTimer = setTimeout(function () {
+                jmaEewOneShotTimer = null;
+                refreshJmaEewTable(true).then(function () { processLiveDataFromStore(false, true); });
+            }, 5 * 60 * 1000);
+        }
+        async function refreshJmaEewTable(quiet) {
+            let added = 0;
+            for (const src of JMA_EEW_SOURCES) {
+                try {
+                    const res = await fetch(src.url, { mode: 'cors', cache: 'no-store' });
+                    if (!res.ok) continue;
+                    const txt = await res.text();
+                    const rows = parseJmaEewHtml(txt);
+                    for (const [t, place] of rows) {
+                        const key = t + "|" + place;
+                        // 警報が既に入っていれば上書きしない（警報が優先）
+                        if (!JMA_EEW_TABLE[key] || src.kind === "警報") {
+                            if (JMA_EEW_TABLE[key] !== src.kind) added += 1;
+                            JMA_EEW_TABLE[key] = src.kind;
+                        }
+                    }
+                } catch (e) { /* 取得失敗時は同梱テーブルで動作継続 */ }
+            }
+            jmaEewLastSync = Date.now();
+            jmaEewSyncCount += 1;
+            if (!quiet) pushMonitorLog('緊急地震速報の発表一覧を最新化しました（同梱' + JMA_EEW_BASE_COUNT + '件＋新規' + added + '件）');
+            return added;
+        }
+
         // ===== 気象庁「緊急地震速報（警報／予報）発表状況」公表一覧（2026/11/21 時点）=====
         // キー: "YYYY/MM/DD HH:MM|震央地名" / 値: "警報" | "予報"
         // 出典: data.jma.go.jp/eew/data/nc/pub_hist/（警報 2008年〜）・fc_hist/（予報 直近約1か月）
         // ※WebSocketで実電文を受信できなかった地震でも、実際に発表された区分を表示するために使用
+        const JMA_EEW_BASE_COUNT = 427;
         const JMA_EEW_TABLE = {
             "2026/11/21 12:17|熊本県天草・芦北地方": "予報",
             "2026/11/20 21:46|熊本県天草・芦北地方": "予報",
@@ -3687,6 +3764,7 @@
             if (code === 551) {
                 mergeLiveReport(msg);
                 processLiveDataFromStore(false, false);
+                scheduleJmaEewRefresh();
             } else if (code === 552) {
                 handleTsunami552(msg);
             } else if (code === 554) {
@@ -3849,7 +3927,12 @@
             }
         }
 
-        window.onload = initApp;
+        window.onload = function () {
+            initApp();
+            // 気象庁の緊急地震速報 発表一覧を起動時と60分ごとに最新化（失敗しても同梱テーブルで動作）
+            refreshJmaEewTable(false);
+            setInterval(function () { refreshJmaEewTable(true); }, 10 * 60 * 1000);
+        };
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5de249ffabcd3d9',t:'MTc5NTI0Nzg0MQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5de249ffabcd3d9',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5de3006baeed3fd',t:'MTc5NTI0ODMwOA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5de3006baeed3fd',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
