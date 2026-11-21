@@ -88,7 +88,7 @@
                     <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                         <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tight text-white truncate">ソナエール</h1>
                         <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full bg-red-600 text-white tracking-wider border border-red-400 shadow-sm animate-pulse shrink-0">LIVE</span>
-                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.18</button>
+                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.19</button>
                     </div>
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <!-- 緑のリアルタイム時計 -->
@@ -271,7 +271,7 @@
         <div class="max-w-[1600px] mx-auto px-4 flex justify-center items-center gap-4 text-xs font-bold flex-wrap">
             <button onclick="openModal('guide')" class="text-slate-400 hover:text-white transition underline decoration-slate-600 underline-offset-4">利用規約・ガイドライン・情報取得元</button>
             <span class="text-slate-600">|</span>
-            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.18)</button>
+            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.19)</button>
         </div>
     </footer>
 
@@ -281,7 +281,7 @@
             <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900 shrink-0">
                 <div class="flex items-center gap-2 sm:gap-4">
                     <button id="tabBtnGuide" onclick="switchModalTab('guide')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-emerald-400 text-emerald-400 flex items-center gap-1.5 transition">🛡️ 利用規約・ガイドライン・取得元</button>
-                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.18)</button>
+                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.19)</button>
                 </div>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1 text-sm font-bold">✕ 閉じる</button>
             </div>
@@ -349,16 +349,34 @@
                     <!-- v5.0.5 -->
                     <!-- v5.0.6 -->
                     <!-- v5.0.7 -->
-                    <!-- v5.0.18 -->
+                    <!-- v5.0.19 -->
                     <div class="bg-slate-900/60 p-4 rounded-lg border border-emerald-500/40 shadow">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
-                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.18</span>
-                                🔊「最大震度」は最初だけ・途中と最後は「震度〇を」
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.19</span>
+                                🏛️過去の大地震アーカイブに2024年以降の震度6弱以上6件を追加（全30件→36件）
                             </span>
                             <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li><strong>令和8年熊本地震（2026/07/28・M7.1・最大震度7）：</strong>宇城市・氷川町で震度7、熊本市南区・八代市・宇土市・美里町・益城町・嘉島町で震度6強。有明・八代海に津波注意報（18:10解除）。</li>
+                            <li><strong>山梨県東部・富士五湖（2026/06/26・M5.6・最大震度6弱）：</strong>富士河口湖町で震度6弱。この領域で震度6弱以上を観測したのは初。</li>
+                            <li><strong>岩手県沖（2026/06/25・M7.2・最大震度6強）：</strong>青森県階上町で震度6強、八戸市で震度6弱。久慈港で津波0.1m。</li>
+                            <li><strong>青森県東方沖（2025/12/08・M7.5・最大震度6強）：</strong>八戸市で震度6強。津波警報を発表し、久慈港で64cmを観測。</li>
+                            <li><strong>トカラ列島近海（2025/07/03・M5.5・最大震度6弱）：</strong>鹿児島県十島村（悪石島）で震度6弱。</li>
+                            <li><strong>豊後水道（2024/04/17・M6.6・最大震度6弱）：</strong>愛媛県愛南町・高知県宿毛市で震度6弱。</li>
+                        </ul>
+                    </div>
+
+                    <!-- v5.0.18 -->
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0.18</span>
+                                🔊「最大震度」は最初だけ・途中と最後は「震度〇を」
+                            </span>
+                            </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
                             <li><strong>「最大震度」は地震の最大震度のときだけ：</strong>「この地震で最大震度7を、〇〇で観測しました。」の1回だけ「最大」を付けます。</li>
                             <li><strong>途中の震度：</strong>「震度6強を、石川県かが。」（最大も、また も、で も付けない）</li>
                             <li><strong>最後（震度3）：</strong>「また、震度3を、〇〇で観測しています。」</li>
@@ -741,6 +759,18 @@
         }
 
         const rawCompactArchive = [
+            { id: "h-2025-aomori-east", t: "2025/12/08 23:15:00", loc: "青森県東方沖", m: "M7.5", d: "54km", coords: "北緯41.0° / 東経142.3°", eew: "緊急地震速報【警報】", tsu: "津波警報発表", max: 60, sub: "【2025年最大の揺れ】",
+                pts: { 60: {"青森県": "八戸市"}, 55: {"青森県": "階上町"}, 50: {"青森県": "三沢市 五戸町 南部町 三戸町 おいらせ町 六戸町 十和田市 野辺地町 東北町 六ヶ所村 七戸町 横浜町", "岩手県": "二戸市 軽米町 一戸町 久慈市 洋野町 普代村 盛岡市 八幡平市 宮古市 田野畑村 岩泉町"}, 45: {"青森県": "青森市 むつ市 つがる市 五所川原市 平内町 外ヶ浜町 蓬田村 今別町 板柳町 鶴田町 中泊町 大間町 東通村 風間浦村 佐井村 田子町 新郷村", "岩手県": "花巻市 北上市 遠野市 釜石市 大船渡市 陸前高田市 滝沢市 雫石町 葛巻町 岩手町 紫波町 矢巾町 西和賀町 金ケ崎町 住田町 山田町 大槌町", "宮城県": "仙台市 石巻市 気仙沼市 大崎市 栗原市 登米市 東松島市 加美町 涌谷町 美里町 南三陸町"}, 40: {"北海道": "函館市 室蘭市 苫小牧市 登別市 伊達市 北斗市 松前町 福島町 知内町 木古内町 七飯町 鹿部町 森町 八雲町 長万部町 白老町 洞爺湖町 壮瞥町 安平町 厚真町 むかわ町 日高町 平取町 新冠町 浦河町 様似町 えりも町", "宮城県": "名取市 多賀城市 岩沼市 塩竈市 白石市 角田市 蔵王町 大河原町 村田町 柴田町 川崎町 丸森町 亘理町 山元町 松島町 七ヶ浜町 利府町 大和町 大郷町 大衡村 色麻町 女川町", "山形県": "山形市 鶴岡市 酒田市 新庄市 寒河江市 村山市 天童市 東根市 尾花沢市 中山町 河北町 大石田町 最上町 舟形町 真室川町 大蔵村 鮭川村 戸沢村 三川町 庄内町 遊佐町", "秋田県": "秋田市 横手市 大館市 鹿角市 由利本荘市 潟上市 大仙市 北秋田市 にかほ市 仙北市 小坂町 上小阿仁村 藤里町 三種町 八峰町 五城目町 井川町 大潟村 美郷町 羽後町 東成瀬村", "福島県": "福島市 郡山市 いわき市 白河市 須賀川市 相馬市 二本松市 田村市 南相馬市 伊達市 本宮市 桑折町 国見町 川俣町 大玉村 鏡石町 天栄村 西郷村 泉崎村 中島村 矢吹町 棚倉町 矢祭町 塙町 鮫川村 石川町 玉川村 平田村 浅川町 古殿町 三春町 小野町 広野町 楢葉町 富岡町 川内村 大熊町 双葉町 浪江町 葛尾村 新地町 飯舘村"} } },
+            { id: "h-2025-tokara", t: "2025/07/03 16:13:00", loc: "トカラ列島近海", m: "M5.5", d: "20km", coords: "北緯29.3° / 東経129.5°", eew: "緊急地震速報【警報】", tsu: "津波の心配なし", max: 55, sub: "【小宝島付近・群発地震】",
+                pts: { 55: {"鹿児島県": "十島村"}, 50: {"鹿児島県": "十島村"}, 45: {"鹿児島県": "十島村 奄美市"}, 40: {"鹿児島県": "十島村 奄美市 大和村 宇検村 瀬戸内町 龍郷町", "沖縄県": "与那国町 竹富町"} } },
+            { id: "h-2024-bungo", t: "2024/04/17 23:14:00", loc: "豊後水道", m: "M6.6", d: "39km", coords: "北緯33.2° / 東経132.4°", eew: "緊急地震速報【警報】", tsu: "津波の心配なし", max: 55, sub: "【愛媛・高知で震度6弱】",
+                pts: { 55: {"愛媛県": "愛南町", "高知県": "宿毛市"}, 50: {"高知県": "土佐清水市 四万十市 大月町 三原村", "愛媛県": "宇和島市 西予市 八幡浜市"}, 45: {"愛媛県": "大洲市 内子町 伊方町 鬼北町 松野町 西条市 大洲市", "高知県": "四万十町 黒潮町 中土佐町 須崎市 土佐市 仁淀川町 佐川町 越知町 江川崎", "大分県": "佐伯市 津久見市 臼杵市"}, 40: {"愛媛県": "松山市 今治市 伊予市 東温市 上島町 久万高原町 松前町 砥部町", "高知県": "高知市 南国市 香美市 香南市 いの町 土佐町 大豊町 本山町 安田町 田野町 奈半利町 北川村 馬路村 芸西村 東洋町", "大分県": "大分市 別府市 日田市 宇佐市 豊後大野市 由布市 杵築市 国東市 日出町 玖珠町 九重町", "宮崎県": "延岡市"}, 30: {"広島県": "広島市 呉市 竹原市 三原市 尾道市 福山市 府中市 大竹市 東広島市 廿日市市 江田島市 府中町 熊野町 海田町 坂町", "山口県": "山口市 下関市 宇部市 防府市 下松市 岩国市 光市 柳井市 周南市 山陽小野田市 和木町 上関町 田布施町 平生町", "岡山県": "岡山市 倉敷市 玉野市 笠岡市 井原市 総社市 備前市 瀬戸内市 赤磐市 浅口市 早島町 里庄町 矢掛町", "徳島県": "徳島市 鳴門市 小松島市 阿南市 吉野川市 阿波市 美馬市 三好市", "香川県": "高松市 丸亀市 坂出市 善通寺市 観音寺市 さぬき市 東かがわ市 三豊市 土庄町 小豆島町 三木町 直島町 宇多津町 綾川町 琴平町 まんのう町", "福岡県": "福岡市 北九州市 大牟田市 久留米市 柳川市 八女市 筑後市 大川市 行橋市 豊前市 中間市 小郡市 筑紫野市 春日市 大野城市 宗像市 太宰府市 古賀市 福津市 うきは市 宮若市 嘉麻市 朝倉市 みやま市 糸島市 那珂川市 宇美町 篠栗町 志免町 須恵町 新宮町 久山町 粕屋町 芦屋町 水巻町 岡垣町 遠賀町 小竹町 鞍手町 桂川町 筑前町 東峰村 大刀洗町 大木町 広川町 香春町 添田町 糸田町 川崎町 福智町 赤村 上毛町 吉富町", "大分県": "中津市 豊後高田市 姫島村"}, 20: {"岡山県": "津山市 高梁市 新見市 真庭市 美作市 和気町 吉備中央町 奈義町 勝央町 美咲町 鏡野町 久米南町 西粟倉村", "広島県": "庄原市 三次市 安芸高田市 北広島町 安芸太田町 大崎上島町", "島根県": "松江市 出雲市 安来市 江津市 浜田市 益田市 大田市 雲南市 飯南町 川本町 美郷町 邑南町", "鳥取県": "鳥取市 米子市 倉吉市 境港市 岩美町 八頭町 三朝町 湯梨浜町 琴浦町 北栄町 日吉津村 大山町 南部町 伯耆町 日南町 日野町 江府町"} } },
+            { id: "h-2026-kumamoto", t: "2026/07/28 16:27:00", loc: "熊本県熊本地方", m: "M7.1", d: "16km", coords: "北緯32.6° / 東経130.6°", eew: "緊急地震速報【警報】", tsu: "津波注意報発表", max: 70, sub: "【令和8年熊本地震】",
+                pts: { 70: {"熊本県": "宇城市 氷川町"}, 60: {"熊本県": "熊本市南区 八代市 宇土市 美里町 益城町 嘉島町"}, 55: {"熊本県": "合志市 大津町 西原村 御船町 上天草市 芦北町 熊本市中央区 熊本市東区 熊本市西区 熊本市北区 山鹿市 菊池市 菊陽町 水俣市 天草市", "鹿児島県": "薩摩川内市 長島町"}, 50: {"熊本県": "玉名市 和水町 山都町 阿蘇市 南阿蘇村 人吉市 あさぎり町", "長崎県": "雲仙市 諫早市 南島原市", "鹿児島県": "出水市 伊佐市", "福岡県": "柳川市 大川市", "佐賀県": "神埼市", "宮崎県": "延岡市 西都市"}, 40: {"熊本県": "荒尾市 南関町 長洲町 玉東町 菊池", "福岡県": "福岡市 久留米市 大牟田市 八女市 筑後市 みやま市 大木町", "佐賀県": "佐賀市 鳥栖市 多久市 武雄市 鹿島市 小城市 嬉野市 吉野ヶ里町 基山町 上峰町 みやき町 白石町 太良町", "長崎県": "長崎市 島原市 大村市 平戸市 松浦市 西海市 東彼杵町 川棚町 波佐見町", "宮崎県": "宮崎市 都城市 小林市 えびの市 三股町 高原町 国富町", "鹿児島県": "鹿児島市 阿久根市 いちき串木野市 日置市 霧島市 曽於市 垂水市 志布志市 姶良市", "大分県": "大分市 中津市 日田市 佐伯市 臼杵市 津久見市 竹田市 豊後高田市 杵築市 宇佐市 豊後大野市 由布市 国東市 姫島村 日出町 九重町 玖珠町"}, 30: {"広島県": "広島市 呉市 竹原市 三原市 尾道市 福山市 府中市 大竹市 東広島市 廿日市市 江田島市 府中町 海田町 熊野町 坂町 北広島町 大崎上島町", "山口県": "山口市 下関市 宇部市 防府市 下松市 岩国市 光市 長門市 柳井市 周南市 山陽小野田市 和木町 上関町 田布施町 平生町", "岡山県": "岡山市 倉敷市 玉野市 笠岡市 井原市 総社市 高梁市 新見市 備前市 瀬戸内市 赤磐市 真庭市 美作市 浅口市 和気町 早島町 里庄町 矢掛町 吉備中央町", "島根県": "松江市 出雲市 安来市 江津市 浜田市 益田市 大田市 雲南市 飯南町 川本町 美郷町 邑南町 津和野町 吉賀町", "鳥取県": "鳥取市 米子市 倉吉市 境港市 岩美町 八頭町 三朝町 湯梨浜町 琴浦町 北栄町 日吉津村 大山町 南部町 伯耆町 日南町 日野町 江府町", "香川県": "高松市 丸亀市 坂出市 善通寺市 観音寺市 さぬき市 東かがわ市 三豊市 土庄町 小豆島町 三木町 直島町 宇多津町 綾川町 琴平町 多度津町 まんのう町", "徳島県": "徳島市 鳴門市 小松島市 阿南市 吉野川市 阿波市 美馬市 三好市", "愛媛県": "松山市 今治市 宇和島市 八幡浜市 新居浜市 西条市 大洲市 伊予市 四国中央市 西予市 東温市 上島町 久万高原町 松前町 砥部町 内子町 伊方町 松野町 鬼北町 愛南町"} } },
+            { id: "h-2026-yamanashi", t: "2026/06/26 22:28:00", loc: "山梨県東部・富士五湖", m: "M5.6", d: "20km", coords: "北緯35.6° / 東経139.0°", eew: "緊急地震速報【警報】", tsu: "津波の心配なし", max: 55, sub: "【富士五湖で初の震度6弱】",
+                pts: { 55: {"山梨県": "富士河口湖町"}, 50: {"山梨県": "大月市"}, 45: {"神奈川県": "相模原市緑区 中井町 松田町 山北町", "山梨県": "富士吉田市 甲府市 笛吹市 甲州市 富士川町 西桂町 忍野村 山中湖村 鳴沢村", "静岡県": "小山町"}, 40: {"山梨県": "富士河口湖町 都留市 上野原市 道志村"}, 30: {"山梨県": "甲斐市 南アルプス市 北杜市 山梨市 韮崎市 中央市 市川三郷町 身延町 昭和町", "神奈川県": "横浜市 川崎市 相模原市 横須賀市 平塚市 藤沢市 厚木市 伊勢原市 秦野市 海老名市 座間市 綾瀬市 寒川町 大磯町 二宮町 愛川町 清川村", "東京都": "八王子市 青梅市 府中市 調布市 町田市 小金井市 小平市 日野市 国分寺市 狛江市 東大和市 多摩市 稲城市 あきる野市 西東京市 瑞穂町 日の出町 檜原村 奥多摩町"}, 20: {"東京都": "千代田区 中央区 港区 新宿区 文京区 台東区 墨田区 江東区 品川区 目黒区 大田区 世田谷区 渋谷区 中野区 杉並区 豊島区 北区 荒川区 板橋区 練馬区 足立区 葛飾区 江戸川区", "埼玉県": "さいたま市 川越市 所沢市 飯能市 川口市 入間市 朝霞市 志木市 和光市 新座市 富士見市 ふじみ野市", "千葉県": "千葉市 市川市 船橋市 松戸市 野田市 成田市 柏市 流山市 鎌ケ谷市 浦安市 習志野市"} } },
+            { id: "h-2026-iwate", t: "2026/06/25 07:30:00", loc: "岩手県沖", m: "M7.2", d: "44km", coords: "北緯40.1° / 東経142.2°", eew: "緊急地震速報【警報】", tsu: "若干の海面変動", max: 60, sub: "【青森県階上町で震度6強】",
+                pts: { 60: {"青森県": "階上町"}, 55: {"青森県": "八戸市 三戸町"}, 50: {"青森県": "三沢市 野辺地町 六戸町 東北町 おいらせ町 五戸町 南部町", "岩手県": "盛岡市 二戸市 八幡平市 軽米町 普代村"}, 45: {"青森県": "青森市 十和田市 七戸町 横浜町 六ヶ所村 むつ市 田子町 新郷村", "岩手県": "宮古市 花巻市 北上市 久慈市 遠野市 一関市 陸前高田市 釜石市 大船渡市 二戸郡一戸町 八幡平市 滝沢市 雫石町 葛巻町 岩手町 紫波町 矢巾町 西和賀町 金ケ崎町 住田町 田野畑村 山田町 岩泉町 洋野町 一戸町", "宮城県": "仙台市 石巻市 気仙沼市 大崎市 栗原市 登米市 東松島市 加美町 涌谷町 美里町 南三陸町", "秋田県": "秋田市 横手市 大館市 鹿角市 由利本荘市 潟上市 大仙市 北秋田市 にかほ市 仙北市 小坂町 上小阿仁村 藤里町 三種町 八峰町 五城目町 井川町 大潟村 美郷町 羽後町 東成瀬村"}, 40: {"北海道": "函館市 室蘭市 苫小牧市 登別市 伊達市 北斗市 松前町 福島町 知内町 木古内町 七飯町 鹿部町 森町 八雲町 長万部町 厚沢部町 白老町 洞爺湖町 壮瞥町 安平町 厚真町 むかわ町 日高町 平取町 新冠町 浦河町 えりも町", "青森県": "五所川原市 つがる市 平内町 今別町 蓬田村 外ヶ浜町 板柳町 鶴田町 中泊町 鰺ヶ沢町 深浦町 大間町 東通村 風間浦村 佐井村", "宮城県": "名取市 多賀城市 岩沼市 塩竈市 白石市 角田市 蔵王町 七ヶ宿町 大河原町 村田町 柴田町 川崎町 丸森町 亘理町 山元町 松島町 七ヶ浜町 利府町 大和町 大郷町 大衡村 色麻町 宮城加美町 女川町", "山形県": "山形市 米沢市 鶴岡市 酒田市 新庄市 寒河江市 上山市 村山市 長井市 天童市 東根市 尾花沢市 南陽市 中山町 山辺町 河北町 朝日町 大江町 大石田町 金山町 最上町 舟形町 真室川町 大蔵村 鮭川村 戸沢村 高畠町 川西町 小国町 白鷹町 飯豊町 三川町 庄内町 遊佐町", "福島県": "福島市 会津若松市 郡山市 いわき市 白河市 須賀川市 喜多方市 相馬市 二本松市 田村市 南相馬市 伊達市 本宮市 桑折町 国見町 川俣町 大玉村 鏡石町 天栄村 下郷町 檜枝岐村 只見町 南会津町 北塩原村 西会津町 磐梯町 猪苗代町 会津坂下町 湯川村 柳津町 三島町 金山町 昭和村 会津美里町 西郷村 泉崎村 中島村 矢吹町 棚倉町 矢祭町 塙町 鮫川村 石川町 玉川村 平田村 浅川町 古殿町 三春町 小野町 広野町 楢葉町 富岡町 川内村 大熊町 双葉町 浪江町 葛尾村 新地町 飯舘村"} } },
             { id: "h-2024-hyuganada", t: "2024/08/08 16:42:55", loc: "日向灘", m: "M7.1", d: "31km", coords: "北緯31.8° / 東経131.7°", eew: "緊急地震速報【警報】", tsu: "津波注意報発表", max: 55, sub: "【南海トラフ調査契機】",
                 pts: { 55: {"宮崎県": "日南市"}, 50: {"宮崎県": "宮崎市"}, 45: {"宮崎県": "都城市 串間市", "鹿児島県": "大崎町"}, 40: {"愛媛県": "宇和島市 八幡浜市 西予市", "高知県": "宿毛市 土佐清水市", "熊本県": "熊本市南区 人吉市 宇城市", "大分県": "佐伯市", "宮崎県": "小林市 三股町 高原町 国富町 綾町", "鹿児島県": "鹿児島市 鹿屋市 指宿市 垂水市 霧島市 曽於市 志布志市 姶良市 東串良町 錦江町 肝付町"}, 30: {"広島県": "呉市 江田島市", "山口県": "柳井市 防府市", "徳島県": "美馬市", "香川県": "高松市 丸亀市", "福岡県": "久留米市 柳川市 八女市", "佐賀県": "佐賀市 白石町", "長崎県": "島原市 雲仙市", "熊本県": "熊本市中央区 八代市 玉名市 天草市", "大分県": "大分市 別府市 日田市 竹田市", "宮崎県": "延岡市 日向市 えびの市 高千穂町", "鹿児島県": "薩摩川内市 出水市 南さつま市"}, 20: {"兵庫県": "淡路市", "島根県": "益田市", "岡山県": "岡山市 倉敷市", "広島県": "広島市中区 福山市", "山口県": "山口市 下関市", "愛媛県": "松山市 今治市", "高知県": "高知市 安芸市"}, 10: {"兵庫県": "神戸市 姫路市", "大阪府": "大阪市 堺市", "和歌山県": "和歌山市 田辺市", "徳島県": "徳島市 鳴門市"} } },
             { id: "h-2024-noto", t: "2024/01/01 16:10:09", loc: "石川県能登地方", m: "M7.6", d: "16km", coords: "北緯37.5° / 東経137.2°", eew: "緊急地震速報【警報】", tsu: "大津波警報発表", max: 70, sub: "【本震】",
@@ -1237,7 +1267,7 @@
             } else {
                 tabHistorical.className = "py-1.5 text-xs font-black rounded-md transition flex items-center justify-center gap-1.5 bg-indigo-600 text-white shadow";
                 tabRealtime.className = "py-1.5 text-xs font-bold rounded-md transition flex items-center justify-center gap-1.5 text-slate-400 hover:text-white hover:bg-slate-800";
-                titleEl.textContent = "過去の大地震アーカイブ (全30件)";
+                titleEl.textContent = "過去の大地震アーカイブ (全36件)";
                 if (searchEl) searchEl.placeholder = "過去の地震を検索 (例: 阪神、能登、熊本、東日本...)";
             }
             
@@ -3046,5 +3076,5 @@
 
         window.onload = initApp;
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5ddb4beaef4d3f2',t:'MTc5NTI0MzI1OA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5ddb4beaef4d3f2',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5ddc0e55b26ba1d',t:'MTc5NTI0Mzc1Ng=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5ddc0e55b26ba1d',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
