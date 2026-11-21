@@ -88,7 +88,7 @@
                     <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                         <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tight text-white truncate">ソナエール</h1>
                         <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full bg-red-600 text-white tracking-wider border border-red-400 shadow-sm animate-pulse shrink-0">LIVE</span>
-                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.16</button>
+                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.0.17</button>
                     </div>
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <!-- 緑のリアルタイム時計 -->
@@ -271,7 +271,7 @@
         <div class="max-w-[1600px] mx-auto px-4 flex justify-center items-center gap-4 text-xs font-bold flex-wrap">
             <button onclick="openModal('guide')" class="text-slate-400 hover:text-white transition underline decoration-slate-600 underline-offset-4">利用規約・ガイドライン・情報取得元</button>
             <span class="text-slate-600">|</span>
-            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.16)</button>
+            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.0.17)</button>
         </div>
     </footer>
 
@@ -281,7 +281,7 @@
             <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900 shrink-0">
                 <div class="flex items-center gap-2 sm:gap-4">
                     <button id="tabBtnGuide" onclick="switchModalTab('guide')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-emerald-400 text-emerald-400 flex items-center gap-1.5 transition">🛡️ 利用規約・ガイドライン・取得元</button>
-                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.16)</button>
+                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.0.17)</button>
                 </div>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1 text-sm font-bold">✕ 閉じる</button>
             </div>
@@ -349,16 +349,30 @@
                     <!-- v5.0.5 -->
                     <!-- v5.0.6 -->
                     <!-- v5.0.7 -->
-                    <!-- v5.0.16 -->
+                    <!-- v5.0.17 -->
                     <div class="bg-slate-900/60 p-4 rounded-lg border border-emerald-500/40 shadow">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
-                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.16</span>
-                                🔊音声読上の文型を整理（観測しましたは1回だけ）＋「南予→みなみを」の誤読を修正
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.0.17</span>
+                                🔊中間の震度の「また」「で」を削除（最大震度〇は、〇〇。）
                             </span>
                             <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li><strong>途中の震度は言い切り：</strong>「また、最大震度〇を、〇〇で。」を廃止し、「最大震度〇は、〇〇。」と読み上げます（「また」も「で」も付けません）。</li>
+                            <li><strong>文型全体：</strong>最大震度「観測しました」→ 途中「最大震度〇は、〇〇。」→ 最後（震度3）「また、最大震度3を、〇〇で観測しています。」</li>
+                        </ul>
+                    </div>
+
+                    <!-- v5.0.16 -->
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-800 text-slate-400 px-2 py-0.5 rounded border border-slate-600">v5.0.16</span>
+                                🔊音声読上の文型を整理（観測しましたは1回だけ）＋「南予→みなみを」の誤読を修正
+                            </span>
+                            </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-400">
                             <li><strong>観測しましたは最大震度の1回だけ：</strong>いちばん高い震度の地域を言った後だけ「観測しました」にし、途中の震度は「また、最大震度5弱を、〇〇で。」と震度と地域だけを言います。最後（震度3）は「観測しています」にしました。</li>
                             <li><strong>南予の誤読を修正：</strong>「南予」を「みなみを」と読むため、愛媛県南予→えひめけんなんよ に変換します（中予→ちゅうよ、東予→とうよ、十島→としま も同様に追加）。</li>
                             <li><strong>読み上げ例：</strong>「この地震で最大震度7を、石川県のとで観測しました。また、最大震度6強を、石川県かがで。また、最大震度5弱を、新潟県ちゅうえつ、愛媛県なんよで。また、最大震度3を、福島県浜通り、東京都にじゅうさんくで観測しています。」</li>
@@ -2142,6 +2156,7 @@
                             return (AREA_IDX_OF[a] != null ? AREA_IDX_OF[a] : 999) - (AREA_IDX_OF[b] != null ? AREA_IDX_OF[b] : 999);
                         });
                         const where = names.map(areaKana).join('、') + 'で';
+                        const whereNames = names.map(areaKana).join('、');
                         const isFirst = (si === 0);
                         const isLast = (si === scales.length - 1);
                         if (isFirst) {
@@ -2151,8 +2166,8 @@
                             // 最後（震度3）は観測しています
                             sentences.push('また、最大' + label + 'を、' + where + '観測しています。');
                         } else {
-                            // 中間は震度と地域だけを言う
-                            sentences.push('また、最大' + label + 'を、' + where + '。');
+                            // 中間は「また」「で」を付けず、震度と地域だけを言う
+                            sentences.push('最大' + label + 'は、' + whereNames + '。');
                         }
                     }
                 } else {
@@ -2171,7 +2186,7 @@
                         } else if (isLast) {
                             sentences.push('また、最大' + scaleKana(g.scaleValue) + 'を、' + where + '観測しています。');
                         } else {
-                            sentences.push('また、最大' + scaleKana(g.scaleValue) + 'を、' + where + '。');
+                            sentences.push('最大' + scaleKana(g.scaleValue) + 'は、' + prefStr + '。');
                         }
                     }
                 }
@@ -3016,5 +3031,5 @@
 
         window.onload = initApp;
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5dda3d22b42d1bb',t:'MTc5NTI0MjU2NQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5dda3d22b42d1bb',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5ddab5dd9d3fcb0',t:'MTc5NTI0Mjg3NA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5ddab5dd9d3fcb0',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
