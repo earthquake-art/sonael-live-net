@@ -114,7 +114,7 @@
                     <div class="flex items-center gap-1.5 sm:gap-2 mb-0.5">
                         <h1 class="text-base sm:text-lg md:text-xl font-black tracking-tight text-white truncate">ソナエール</h1>
                         <span class="text-[9px] sm:text-[10px] font-extrabold px-1.5 sm:px-2 py-0.5 rounded-full bg-red-600 text-white tracking-wider border border-red-400 shadow-sm animate-pulse shrink-0">LIVE</span>
-                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v5.9</button>
+                        <button id="versionBadge" onclick="openModal('changelog')" class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-700 text-emerald-400 border border-emerald-500/40 hover:bg-slate-600 transition shrink-0">v6.1</button>
                     </div>
                     <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
                         <!-- 緑のリアルタイム時計 -->
@@ -185,6 +185,15 @@
     <main id="mainContainer" class="max-w-[1600px] mx-auto w-full flex-1 flex flex-col lg:grid lg:grid-cols-12 gap-0 lg:gap-6 overflow-y-auto lg:overflow-hidden p-2 sm:p-3 lg:p-4 pb-20 lg:pb-4">
         <div id="detailsSection" class="w-full lg:col-span-8 lg:block lg:overflow-y-auto lg:pr-2 space-y-3 sm:space-y-4">
             <section class="dark-surface rounded-xl border p-3.5 sm:p-4 shadow-lg relative min-h-[150px]">
+                <!-- ▼ 緊急地震速報（予報・警報）の発表帯：直近30分に発表があれば常時表示 ▼ -->
+                <div id="eewAnnounceBanner" class="hidden mb-3 rounded-lg p-2.5 items-start gap-2.5 shadow-sm border">
+                    <svg class="w-5 h-5 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    <div class="min-w-0 flex-1">
+                        <p id="eewAnnounceTitle" class="text-xs sm:text-sm font-black leading-snug"></p>
+                        <p id="eewAnnounceSub" class="text-[10px] sm:text-[11px] leading-snug mt-0.5 opacity-90"></p>
+                    </div>
+                    <button onclick="dismissEewAnnounceBanner()" title="このお知らせを閉じる（次の発表でまた表示します）" class="flex-shrink-0 -mt-0.5 -mr-0.5 w-6 h-6 rounded text-slate-400 hover:text-white hover:bg-white/10 transition text-sm leading-none">✕</button>
+                </div>
                 <div id="eewFalseAlarmBanner" class="hidden mb-3 bg-yellow-500/20 border border-yellow-500/50 rounded-lg p-2.5 flex items-start gap-2.5 shadow-sm">
                     <svg class="w-5 h-5 text-yellow-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                     <p id="eewFalseAlarmText" class="text-xs sm:text-sm font-bold text-yellow-300 leading-relaxed"></p>
@@ -316,7 +325,7 @@
         <div class="max-w-[1600px] mx-auto px-4 flex justify-center items-center gap-4 text-xs font-bold flex-wrap">
             <button onclick="openModal('guide')" class="text-slate-400 hover:text-white transition underline decoration-slate-600 underline-offset-4">利用規約・ガイドライン・情報取得元</button>
             <span class="text-slate-600">|</span>
-            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v5.9)</button>
+            <button onclick="openModal('changelog')" class="text-emerald-400 hover:text-emerald-300 transition underline decoration-emerald-600/50 underline-offset-4 flex items-center gap-1">✨ アップデート履歴 (v6.1)</button>
         </div>
     </footer>
 
@@ -326,7 +335,7 @@
             <div class="p-3 sm:p-4 border-b border-slate-700 flex justify-between items-center bg-slate-900 shrink-0">
                 <div class="flex items-center gap-2 sm:gap-4">
                     <button id="tabBtnGuide" onclick="switchModalTab('guide')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-emerald-400 text-emerald-400 flex items-center gap-1.5 transition">🛡️ 利用規約・ガイドライン・取得元</button>
-                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v5.9)</button>
+                    <button id="tabBtnChange" onclick="switchModalTab('changelog')" class="pb-1 text-xs sm:text-sm font-bold border-b-2 border-transparent text-slate-400 hover:text-slate-200 flex items-center gap-1.5 transition">✨ 履歴 (v6.1)</button>
                 </div>
                 <button onclick="closeModal()" class="text-slate-400 hover:text-white transition p-1 text-sm font-bold">✕ 閉じる</button>
             </div>
@@ -394,14 +403,48 @@
                     <!-- v1.9 -->
                     <!-- v2.0 -->
                     <!-- v2.1 -->
-                    <!-- v5.9 -->
+                    <!-- 最新版 -->
                     <div class="bg-slate-900/60 p-4 rounded-lg border border-emerald-500/40 shadow">
                         <div class="flex items-center justify-between mb-2">
                             <span class="text-xs sm:text-sm font-black text-emerald-400 flex items-center gap-1.5">
-                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v5.9</span>
-                                🔄 更新ボタンを押したときの手応えを表示
+                                <span class="bg-emerald-500/20 text-emerald-300 px-2 py-0.5 rounded border border-emerald-500/30">v6.1</span>
+                                ⚡「発表された瞬間」に出す（速報553の受信＋60秒ごとの照合）
                             </span>
                             <span class="text-[10px] text-emerald-400 font-mono font-bold">LATEST</span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li>v6.1：気象庁の予報・警報（<b>code 553</b>）を受信した<b>その瞬間</b>に、帯とバッジへ出すようにしました。これまでは揺れ検知（554・震源なし）と警報（556）しか拾っておらず、<b>予報は震源不明のまま／最大震度も出ない</b>状態でした。</li>
+                            <li>予報でも「<b>EEW 予報 日向灘 最大震度3</b>」のように震源・最大震度・M・第N報を表示します。</li>
+                            <li>気象庁の発表一覧の取り直しを<b>5分ごと → 60秒ごと</b>にしました（発表から約1分で反映）。</li>
+                            <li>気象庁の一覧に付いている<b>10分キャッシュ</b>を避けるよう、取得URLに時刻を付けました（古い一覧を読んで「出ない」ことがありました）。</li>
+                            <li>60秒ごとのアクセスでログが埋まらないよう、<b>「更新しました」のログは1分に1回</b>までに抑えました（失敗・新着の発表・初回は毎回表示）。</li>
+                            <li>再接続時のHTTP補完（554／556の取りこぼし回収）でも、バッジと帯へ反映するようにしました。</li>
+                        </ul>
+                    </div>
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-700 text-slate-200 px-2 py-0.5 rounded border border-slate-600">v6.0</span>
+                                ⚡ 緊急地震速報の予報・警報を画面上部で知らせる
+                            </span>
+                        </div>
+                        <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
+                            <li>気象庁が緊急地震速報（予報・警報）を発表すると、<b>詳細画面の上部に帯（お知らせ）</b>が出るようにしました。「🚨 緊急地震速報（警報）が発表されました：日向灘」のように震源・発表時刻・マグニチュードを表示します。</li>
+                            <li>モニターバーの <b>EEW バッジに震源を併記</b>するようにしました（例：「EEW 予報 日向灘」「EEW 警報 熊本県天草・芦北地方」）。これまでは「予報」「警報」だけで、どの地震か分かりませんでした。</li>
+                            <li><b>気象庁の発表一覧を見ているのに、バッジが「なし」のままだった不具合を修正しました。</b>取得したデータをバッジ・帯へ反映する処理が抜けていたためです。</li>
+                            <li>発表時刻から30分で自動的に消えます。帯の ✕ を押せば閉じられます（次の発表でまた出ます）。</li>
+                            <li>音・自動読み上げは従来どおり行いません（画面の表示のみ）。</li>
+                            <li>地震情報の到着前に予報が出た場合は、帯に「地震情報の到着前のため、下の見出しは別の地震のことがあります」と注記します。</li>
+                            <li>表示は、気象庁の発表一覧（予報・警報）と、受信した電文の両方を根拠にしています。</li>
+                        </ul>
+                    </div>
+                    <!-- v5.9 -->
+                    <div class="bg-slate-900/40 p-4 rounded-lg border border-slate-700/60 shadow">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-xs sm:text-sm font-bold text-slate-300 flex items-center gap-1.5">
+                                <span class="bg-slate-700 text-slate-200 px-2 py-0.5 rounded border border-slate-600">v5.9</span>
+                                🔄 更新ボタンを押したときの手応えを表示
+                            </span>
                         </div>
                         <ul class="space-y-1.5 list-disc list-inside text-xs text-slate-300">
                             <li>ヘッダーの 🔄 を押すと、<b>「手動更新：最新の地震情報を取得しています…」</b>と表示し、完了時に<b>新着件数をログに出します</b>（例：「手動更新：完了（新着3件／全60件を取得）」）。</li>
@@ -1225,6 +1268,8 @@
         ];
         let jmaEewLastSync = 0;
         let jmaEewSyncCount = 0;
+        let jmaQuietLogAt = 0;   // 定期取得のログを出した時刻（1分に1回までに抑える）
+        let jmaNewestPublished = '';   // 気象庁一覧の最新発表時刻（"YYYY/MM/DD HH:MM"）
         function parseJmaEewHtml(htmlText) {
             const out = [];
             const rowRe = /<tr[^>]*>([\s\S]*?)<\/tr>/g;
@@ -1240,7 +1285,7 @@
             }
             return out;
         }
-        // 地震を検知したら、気象庁の公表が反映される頃（5分後）に一度だけ取り直す
+        // 地震を検知したら、気象庁の公表が反映される頃（60秒後）に一度だけ取り直す
         let jmaEewOneShotTimer = null;
         let jmaEewOneShotAt = 0;
         function scheduleJmaEewRefresh() {
@@ -1249,17 +1294,108 @@
             jmaEewOneShotTimer = setTimeout(function () {
                 jmaEewOneShotTimer = null;
                 refreshJmaEewTable(true).then(function () { processLiveDataFromStore(false, true); });
-            }, 5 * 60 * 1000);
+            }, 60 * 1000);
         }
         let recentPublished = [];
         let firstJmaSync = true;   // 起動直後の一括同期ではログを出さない
+        // 気象庁の一覧を取得した直後に、最新の発表（予報・警報）をバッジとログへ反映する。
+        // 電文（554/556）を取りこぼしていても、気象庁が実際に発表した事実はここから必ず拾える。
+        // ページを開いた時点ですでに発表済みだったものは「新着」として扱わない（重複表示の防止）。
+        function jmaIsNewPublication(kind, timeStr, place) {
+            try {
+                const raw = safeStorageGet('sonaeru_jma_seen_v1');
+                if (!raw) return true;
+                const seen = JSON.parse(raw);
+                if (!seen || typeof seen !== 'object') return true;
+                return !seen[kind + '|' + timeStr + '|' + place];
+            } catch (e) { return true; }
+        }
+        function jmaMarkSeen(kind, timeStr, place) {
+            try {
+                const nowMs = Date.now();
+                const raw = safeStorageGet('sonaeru_jma_seen_v1');
+                let seen = raw ? JSON.parse(raw) : {};
+                if (!seen || typeof seen !== 'object') seen = {};
+                seen[kind + '|' + timeStr + '|' + place] = nowMs;
+                for (const k in seen) {
+                    if (!(seen[k] >= nowMs - 24 * 3600 * 1000)) delete seen[k];
+                }
+                safeStorageSet('sonaeru_jma_seen_v1', JSON.stringify(seen));
+            } catch (e) { /* 保存できない環境では毎回新着として扱う */ }
+        }
+        // 気象庁の発表（分単位）に対応する地震情報（551）が既に届いているか。
+        // 届いていれば「詳細画面の見出し」と一致しているので、帯に注意書きは出さない。
+        function jmaIsAwaitingQuakeInfo(timeStr, place) {
+            const t0 = parseJstTime(timeStr).getTime();
+            if (isNaN(t0)) return true;
+            const arr = (typeof getLiveReportsArray === 'function') ? getLiveReportsArray() : [];
+            for (let i = 0; i < arr.length; i = i + 1) {
+                const it = arr[i];
+                const h = it && it.earthquake && it.earthquake.hypocenter ? it.earthquake.hypocenter.name : '';
+                if (!h) continue;
+                // 震源地名まで一致していることを必須にする（別の地震と取り違えないため）
+                if (place) {
+                    const a = String(h).replace(/[（(].*?[)）]/g, '');
+                    const b = String(place).replace(/[（(].*?[)）]/g, '');
+                    if (a.indexOf(b) === -1 && b.indexOf(a) === -1) continue;
+                }
+                const t = parseJstTime((it.earthquake && it.earthquake.time) || (it.issue && it.issue.time) || it.time || '').getTime();
+                if (!isNaN(t) && Math.abs(t - t0) <= 90 * 1000) return false;
+            }
+            return true;
+        }
+        function applyJmaLatestEew() {
+            if (!recentPublished || recentPublished.length === 0) return;
+            let best = null;
+            let newestTime = '';
+            for (let i = 0; i < recentPublished.length; i = i + 1) {
+                const x = recentPublished[i];
+                // 新着判定（前回の取得時に無かったものを一度だけ記録する）
+                if (!jmaIsNewPublication(x.kind, x.time, x.place)) {
+                    x.isNew = false;
+                } else {
+                    jmaMarkSeen(x.kind, x.time, x.place);
+                    x.isNew = true;
+                }
+                if (!best || x.time > best.time || (x.time === best.time && x.kind === '警報')) best = x;
+                if (x.time > newestTime) newestTime = x.time;
+            }
+            jmaNewestPublished = newestTime;
+            if (!best) return;
+            const at = parseJstTime(best.time).getTime();
+            if (isNaN(at)) return;
+            // 発表から30分以内だけ表示する（自分の時計がずれていても、未来の発表は拾わない）
+            if (Date.now() - at > EEW_STATE_TTL_MS) return;
+            if (Date.now() - at < -5 * 60 * 1000) return;
+            const newKey = best.time + '|' + best.place + '|' + best.kind;
+            const prevKey = eewState && eewState.jmaKey ? eewState.jmaKey : '';
+            eewState = {
+                kind: best.kind === '警報' ? 'warning' : 'forecast',
+                name: best.place,
+                at: at,
+                jma: true,
+                jmaKey: newKey,
+                jmaTime: best.time,
+                isNew: !!best.isNew,
+                key: 'jma|' + newKey,
+                awaitingQuakeInfo: jmaIsAwaitingQuakeInfo(best.time, best.place)
+            };
+            // 改めて「新しく発表された」と分かるのは、直近の取得で新規に入ったときだけ
+            if (prevKey !== newKey && best.isNew) {
+                pushMonitorLog('【緊急地震速報（' + best.kind + '）】' + best.place + '　' + best.time + ' を発表（気象庁公表）');
+            }
+            renderEewState();
+        }
         async function refreshJmaEewTable(quiet) {
             let added = 0;
             let okPages = 0, failPages = 0;
             recentPublished = [];
             for (const src of JMA_EEW_SOURCES) {
                 try {
-                    const res = await fetch(src.url, { mode: 'cors', cache: 'no-store' });
+                    // 気象庁の一覧は Cache-Control: max-age=600（10分）が付くため、
+                    // 取得時刻をクエリに付けてキャッシュを避ける（付けると毎回 Miss＝最新を取得）
+                    const url = src.url + (src.url.indexOf('?') === -1 ? '?' : '&') + 't=' + Date.now();
+                    const res = await fetch(url, { mode: 'cors', cache: 'no-store' });
                     if (!res.ok) { failPages += 1; continue; }
                     okPages += 1;
                     const txt = await res.text();
@@ -1290,28 +1426,27 @@
             const firstTime = firstJmaSync;
             if (firstJmaSync) firstJmaSync = false;
 
-            const freshPublished = firstTime ? [] : recentPublished.filter(function (x) {
-                const t = parseJstTime(x.time).getTime();
-                return !isNaN(t) && (Date.now() - t) >= -120000 && (Date.now() - t) <= 15 * 60 * 1000;
-            });
-            recentPublished = [];
-
-            if (freshPublished.length > 0) {
-                freshPublished.slice(-3).forEach(function (x) {
-                    pushMonitorLog('【緊急地震速報（' + x.kind + '）】' + x.place + '　' + x.time + ' を発表（気象庁公表）');
-                });
-            } else if (okAll) {
-                // 定期取得（quiet）でも「アクセスしたこと」は必ず表示する
-                if (firstTime) {
-                    pushMonitorLog('気象庁へアクセス（' + hhmmss + '）緊急地震速報の発表一覧を取得しました：同梱' + JMA_EEW_BASE_COUNT + '件・新規' + added + '件');
-                } else {
-                    pushMonitorLog('気象庁へアクセス（' + hhmmss + '）発表一覧を更新：新規' + added + '件・同梱' + JMA_EEW_BASE_COUNT + '件');
-                }
-            } else if (failPages > 0 && okPages === 0) {
+            // ① 気象庁へのアクセス結果はログに出す
+            //    （60秒ごとに取り直すため、成功の「更新」ログは1分に1回まで。
+            //      失敗・初回・新着の発表は毎回出す＝知らせるべき情報を落とさない）
+            const logNowMs = Date.now();
+            const quietSuccess = (jmaQuietLogAt && (logNowMs - jmaQuietLogAt) < 55 * 1000);
+            if (failPages > 0 && okPages === 0) {
                 pushMonitorLog('気象庁へアクセス失敗（' + hhmmss + '）：発表一覧を取得できませんでした（同梱データで継続）');
-            } else {
+            } else if (!okAll) {
                 pushMonitorLog('気象庁へアクセス（' + hhmmss + '）一部取得できませんでした（' + okPages + '件成功／' + failPages + '件失敗）');
+            } else if (firstTime) {
+                pushMonitorLog('気象庁へアクセス（' + hhmmss + '）緊急地震速報の発表一覧を取得しました：同梱' + JMA_EEW_BASE_COUNT + '件・新規' + added + '件');
+                jmaQuietLogAt = logNowMs;
+            } else if (!quietSuccess || added > 0) {
+                pushMonitorLog('気象庁へアクセス（' + hhmmss + '）発表一覧を更新：新規' + added + '件・同梱' + JMA_EEW_BASE_COUNT + '件');
+                jmaQuietLogAt = logNowMs;
             }
+
+            // ② 最新の発表（予報・警報）をバッジ・画面上部の帯・ログへ反映する
+            //    （取得だけで終わらせない。電文を取りこぼしていても発表事実はここで拾う）
+            applyJmaLatestEew();
+            recentPublished = [];
             return added;
         }
 
@@ -3194,14 +3329,15 @@
             }
 
             const eewEl = document.getElementById("detailEew");
-            eewEl.textContent = targetEq.eewStatus;
-            if (targetEq.eewStatus.indexOf("発表後取消") !== -1) {
+            const detailEewText = targetEq.eewStatus;
+            eewEl.textContent = detailEewText;
+            if (detailEewText.indexOf("発表後取消") !== -1) {
                 eewEl.className = "font-bold text-slate-500 text-xs sm:text-sm leading-snug block";
-            } else if (targetEq.eewStatus.indexOf("【警報】") !== -1) {
+            } else if (detailEewText.indexOf("【警報】") !== -1) {
                 eewEl.className = "font-extrabold text-rose-400 text-xs sm:text-sm leading-snug block";
-            } else if (targetEq.eewStatus.indexOf("【予報】") !== -1) {
+            } else if (detailEewText.indexOf("【予報】") !== -1) {
                 eewEl.className = "font-bold text-amber-300 text-xs sm:text-sm leading-snug block";
-            } else if (targetEq.eewStatus === "遠地地震") {
+            } else if (detailEewText === "遠地地震") {
                 eewEl.className = "font-extrabold text-sky-400 text-xs sm:text-sm leading-snug block";
             } else {
                 eewEl.className = "font-semibold text-slate-400 text-xs sm:text-sm leading-snug block";
@@ -3209,7 +3345,7 @@
             const eewNoteEl = document.getElementById("detailEewNote");
             if (eewNoteEl) {
                 const note = targetEq.eewNote
-                    || (targetEq.eewStatus.indexOf("【予報】") !== -1
+                    || (detailEewText.indexOf("【予報】") !== -1
                         ? "警報（強い揺れの予想）は未発表"
                         : "");
                 if (note) {
@@ -3740,6 +3876,8 @@
             if (isChanged || isBrandNew) {
                 processData(arr, isFirstLoad, isBrandNew);
             }
+            // 地震情報が届いたら「到着前」の注意書きを消すため、バッジ・帯も描き直す
+            if (typeof renderEewState === 'function' && eewState) renderEewState();
             updateLastReceivedTime();
         }
         function updateLastReceivedTime() {
@@ -3947,28 +4085,101 @@
             });
             fetchJsonQuiet(HTTP_HISTORY + '?codes=554&limit=20').then(function (rows) {
                 let added = 0;
+                let newest = null;
                 (rows || []).forEach(function (row) {
                     if (!row || !row.id) return;
                     const t = parseJstTime(row.time || 0).getTime();
                     if (isNaN(t) || Date.now() - t >= 6 * 3600 * 1000) return;
                     if (!eewDetections.some(function (d) { return d.id === row.id; })) added = added + 1;
                     storeEewDetection(row);
+                    if (!newest || t > newest.t) newest = { t: t, row: row };
                 });
-                if (added > 0) processLiveDataFromStore(false, true);
+                if (added > 0) {
+                    // 予報（554）を取りこぼしていた場合も、補完した時点でバッジ・帯へ出す
+                    if (newest && (!eewState || newest.t > (eewState.at || 0))) {
+                        const d = (newest.row.earthquake || {});
+                        const nm = d.hypocenter ? d.hypocenter.name : '';
+                        if (nm) setEewState('forecast', { name: nm });
+                    }
+                    processLiveDataFromStore(false, true);
+                }
             });
             fetchJsonQuiet(HTTP_HISTORY + '?codes=556&limit=6').then(function (rows) {
                 let added = 0;
+                let newest = null;
                 (rows || []).forEach(function (row) {
                     if (!row || !row.id) return;
                     for (let i = 0; i < eewRecent.length; i = i + 1) { if (eewRecent[i].id === row.id) return; }
                     const snap = snapshotFrom556(row);
                     const ageMs = Date.now() - parseJstTime(snap.time || 0).getTime();
-                    if (ageMs >= 0 && ageMs < 3 * 3600 * 1000) { eewRecent.push(snap); added = added + 1; }
+                    if (ageMs >= 0 && ageMs < 3 * 3600 * 1000) {
+                        eewRecent.push(snap); added = added + 1;
+                        if (!newest || snap.receivedAt > newest.receivedAt) newest = snap;
+                    }
                 });
                 trimEewRecent();
-                if (added > 0) processLiveDataFromStore(false, true);
+                if (added > 0) {
+                    // 警報（556）を取りこぼしていた場合も、補完した時点でバッジ・帯へ出す
+                    if (newest && (!eewState || (newest.originTime && parseJstTime(newest.originTime).getTime() > (eewState.at || 0)))) {
+                        setEewState(newest.cancelled ? 'cancel' : 'warning', newest);
+                    }
+                    processLiveDataFromStore(false, true);
+                }
             });
         }
+
+        // ---------- EEW 553（緊急地震速報の各報・予報／警報の本体）----------
+        // P2P地震情報の 554 は「検知（＝揺れ検知の合図）」で震源を持たず、556 は警報のみ。
+        // 予報を速く・震源つきで受けるには 553（各報）を使う。音・読み上げは行わない（v1.7 の方針を維持）。
+        function eewKindFrom553(msg) {
+            // 電文に警報／予報の区分が入っていればそれを使い、無ければ「予報」として扱う
+            const raw = String((msg && (msg.type || (msg.issue && msg.issue.type))) || '').toLowerCase();
+            if (raw.indexOf('warning') !== -1 || raw.indexOf('警報') !== -1) return 'warning';
+            return 'forecast';
+        }
+        function handleEew553(msg) {
+            if (!msg || typeof msg !== 'object') return;
+            const snap = snapshotFrom556(msg);
+            if (!snap.hypoName && !snap.originTime) return;   // 震源も発生時刻も無い電文は表示に使わない
+            const kind = snap.cancelled ? 'cancel' : eewKindFrom553(msg);
+            const label = kind === 'warning' ? '警報' : (kind === 'cancel' ? '警報（取消）' : '予報');
+            if (kind === 'warning') {
+                // 556 と同じ履歴に積み、551との相関（詳細欄の【警報】（受信済））でも使えるようにする
+                let replaced = false;
+                for (let i = 0; i < eewRecent.length; i = i + 1) {
+                    if (eewRecent[i].id === snap.id) { eewRecent[i] = snap; replaced = true; break; }
+                }
+                if (!replaced) eewRecent.push(snap);
+                trimEewRecent();
+            } else if (kind === 'cancel') {
+                let cancelHypo = snap.hypoName;
+                if (!cancelHypo) {
+                    for (let i = eewRecent.length - 1; i >= 0; i = i - 1) {
+                        if (eewRecent[i].hypoName) { cancelHypo = eewRecent[i].hypoName; break; }
+                    }
+                }
+                setEewState('cancel', { hypoName: cancelHypo });
+                pushMonitorLog('【緊急地震速報（警報）取消】' + (cancelHypo || '震源調査中'));
+                processLiveDataFromStore(false, true);
+                return;
+            }
+            // 同じ地震・同じ区分を何度も「新着」扱いしない（受信のたびにログで上書きされるため）
+            if (kind === 'forecast') {
+                storeEewDetection({ id: msg.id, time: snap.originTime || msg.time, type: msg.type || '' });
+            }
+            const sig = (snap.originTime || '') + '|' + (snap.hypoName || '') + '|' + kind;
+            const isNewSig = (sig !== lastEew553Sig);
+            if (isNewSig) lastEew553Sig = sig;
+            if (isNewSig) {
+                pushMonitorLog('【緊急地震速報（' + label + '）】' + (snap.hypoName || '震源調査中')
+                    + (snap.magnitude != null ? ' M' + Number(snap.magnitude).toFixed(1) : '')
+                    + (snap.serial ? '（第' + snap.serial + '報）' : '')
+                    + ' を発表');
+            }
+            setEewState(kind, snap);
+            processLiveDataFromStore(false, true);
+        }
+        let lastEew553Sig = '';
 
         // ---------- EEW (554 / 556) ----------
         function maxScaleToValue(areas) {
@@ -4159,11 +4370,33 @@
         // 画面・音での発報は行わず、状態表示のみを更新する（v1.7 方針を維持）
         const EEW_STATE_TTL_MS = 30 * 60 * 1000;   // 30分で「なし」に戻す
         function setEewState(kind, snap) {
-            const at = Date.now();
+            // 554/556 は「いつ受信したか」ではなく「いつ発生したか」を基準にする（再接続時の補完で古い電文を拾わないため）
+            let at = Date.now();
+            const ot = snap && snap.originTime ? parseJstTime(snap.originTime).getTime() : NaN;
+            if (!isNaN(ot) && Math.abs(Date.now() - ot) <= 3 * 60 * 60 * 1000) at = ot;
+            // 地震情報（551）が既に届いている発表は「到着待ち」ではない
+            const sigMin = (function () {
+                const d = new Date(at + 9 * 60 * 60 * 1000);
+                return d.getUTCFullYear() + '/' + String(d.getUTCMonth() + 1).padStart(2, '0') + '/' + String(d.getUTCDate()).padStart(2, '0')
+                    + ' ' + String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+            })();
+            // 同じ発表を何度も「新着」扱いしないための識別キー
+            // 554 は {name: 震源}、556/553 は {hypoName: 震源} で渡ってくるので両方を見る
+            const eewName = (snap && (snap.hypoName || snap.name)) || '';
+            const stamp = String(at) + '|' + eewName;
             if (kind === 'cancel') {
-                eewState = { kind: 'cancel', name: (snap && snap.hypoName) || '', at: at };
+                eewState = { kind: 'cancel', name: eewName, at: at, key: 'ws|cancel|' + stamp, awaitingQuakeInfo: false };
             } else if (kind === 'forecast') {
-                eewState = { kind: 'forecast', name: (snap && snap.name) || '', at: at };
+                eewState = {
+                    kind: 'forecast',
+                    name: eewName,
+                    mag: (snap && snap.magnitude != null) ? snap.magnitude : null,
+                    scale: (snap && snap.scaleMax != null) ? snap.scaleMax : null,
+                    serial: (snap && snap.serial) || null,
+                    at: at,
+                    key: 'ws|forecast|' + stamp,
+                    awaitingQuakeInfo: jmaIsAwaitingQuakeInfo(sigMin, eewName)
+                };
             } else {
                 eewState = {
                     kind: 'warning',
@@ -4171,43 +4404,116 @@
                     mag: (snap && snap.magnitude != null) ? snap.magnitude : null,
                     scale: (snap && snap.scaleMax != null) ? snap.scaleMax : null,
                     serial: (snap && snap.serial) || null,
-                    at: at
+                    at: at,
+                    key: 'ws|warning|' + stamp,
+                    awaitingQuakeInfo: jmaIsAwaitingQuakeInfo(sigMin, (snap && (snap.hypoName || snap.name)) || '')
                 };
             }
             renderEewState();
+        }
+        // 画面上部の発表帯（モニターバーの小さいバッジだけでは気づきにくいため）
+        let eewBannerDismissedKey = '';
+        function dismissEewAnnounceBanner() {
+            eewBannerDismissedKey = (eewState && eewState.key) ? eewState.key : '';
+            const band = document.getElementById('eewAnnounceBanner');
+            if (band) { band.classList.add('hidden'); band.classList.remove('flex'); }
+        }
+        function renderEewAnnounceBanner() {
+            const band = document.getElementById('eewAnnounceBanner');
+            const title = document.getElementById('eewAnnounceTitle');
+            const sub = document.getElementById('eewAnnounceSub');
+            if (!band || !title || !sub) return;
+            if (!eewState) { band.classList.add('hidden'); band.classList.remove('flex'); return; }
+            if (eewBannerDismissedKey && eewBannerDismissedKey === eewState.key) return;
+            const name = eewState.name ? eewState.name : '震源調査中';
+            const when = eewState.jmaTime ? eewState.jmaTime : '';
+            const src = eewState.jma ? '（気象庁公表）' : '';
+            const parts = [];
+            if (when) parts.push(when + src);
+            if (eewState.mag != null) parts.push('M' + Number(eewState.mag).toFixed(1));
+            if (eewState.kind === 'warning' && eewState.scale != null && eewState.scale > 0 && SCALE_MAP[eewState.scale]) {
+                parts.push('最大震度' + String(SCALE_MAP[eewState.scale].label).replace('震度', ''));
+            }
+            if (eewState.serial) parts.push('第' + eewState.serial + '報');
+            const meta = parts.filter(function (x) { return x; }).join('　');
+            // 地震情報（551）がまだ届いていない ＝ 詳細画面の見出しが別の地震のことがある
+            // （毎回その場で判定し直す：地震情報が届いたら注意書きを消す）
+            let pending = eewState.awaitingQuakeInfo !== false;
+            if (eewState.jma && eewState.jmaTime) pending = jmaIsAwaitingQuakeInfo(eewState.jmaTime, eewState.name);
+            else if (eewState.at) {
+                const d = new Date(eewState.at + 9 * 60 * 60 * 1000);
+                const sig = d.getUTCFullYear() + '/' + String(d.getUTCMonth() + 1).padStart(2, '0') + '/' + String(d.getUTCDate()).padStart(2, '0')
+                    + ' ' + String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+                pending = jmaIsAwaitingQuakeInfo(sig, eewState.name);
+            }
+            band.classList.remove('hidden');
+            band.classList.add('flex');
+            if (eewState.kind === 'warning') {
+                band.className = 'mb-3 bg-rose-500/15 border-rose-500/60 rounded-lg p-2.5 flex items-start gap-2.5 shadow-sm border';
+                title.className = 'text-xs sm:text-sm font-black leading-snug text-rose-300';
+                title.textContent = '🚨 緊急地震速報（警報）が発表されました：' + name;
+                sub.className = 'text-[10px] sm:text-[11px] leading-snug mt-0.5 text-rose-200/80';
+                sub.textContent = (meta ? meta + '　強い揺れに警戒してください。' : '強い揺れに警戒してください。')
+                    + (pending ? '（地震情報の到着前のため、下の見出しは別の地震のことがあります）' : '');
+            } else if (eewState.kind === 'forecast') {
+                band.className = 'mb-3 bg-amber-500/15 border-amber-500/60 rounded-lg p-2.5 flex items-start gap-2.5 shadow-sm border';
+                title.className = 'text-xs sm:text-sm font-black leading-snug text-amber-300';
+                title.textContent = '⚡ 緊急地震速報（予報）が発表されました：' + name;
+                sub.className = 'text-[10px] sm:text-[11px] leading-snug mt-0.5 text-amber-200/80';
+                sub.textContent = (meta ? meta + '　揺れが弱い予想の地震です（警報は未発表）。' : '揺れが弱い予想の地震です（警報は未発表）。')
+                    + (pending ? '（地震情報の到着前のため、下の見出しは別の地震のことがあります）' : '');
+            } else {
+                band.className = 'mb-3 bg-slate-600/20 border-slate-500/60 rounded-lg p-2.5 flex items-start gap-2.5 shadow-sm border';
+                title.className = 'text-xs sm:text-sm font-black leading-snug text-slate-300';
+                title.textContent = '緊急地震速報（警報）は取り消されました：' + name;
+                sub.className = 'text-[10px] sm:text-[11px] leading-snug mt-0.5 text-slate-400';
+                sub.textContent = meta;
+            }
+            band.title = '発表から30分間表示します。✕で閉じられます（次の発表でまた表示します）。';
         }
         function renderEewState() {
             const badge = document.getElementById('eewStateBadge');
             const value = document.getElementById('eewStateValue');
             if (!badge || !value) return;
             const now = Date.now();
-            if (!eewState || (now - (eewState.at || 0)) > EEW_STATE_TTL_MS) {
+            // 気象庁の公表一覧から作った状態は「発表時刻」を基準に鮮度を測る
+            const basis = (eewState && eewState.jma && eewState.at) ? eewState.at : (eewState && eewState.at) || 0;
+            if (!eewState || (now - basis) > EEW_STATE_TTL_MS) {
                 eewState = null;
                 value.textContent = 'なし';
                 value.className = 'text-slate-400 font-bold';
                 badge.title = '緊急地震速報（警報・予報）の発表はありません';
+                renderEewAnnounceBanner();
                 return;
             }
             if (eewState.kind === 'warning') {
                 const scaleTxt = (eewState.scale != null && eewState.scale > 0 && SCALE_MAP[eewState.scale])
                     ? '最大震度' + String(SCALE_MAP[eewState.scale].label).replace('震度', '') : '';
-                value.textContent = '警報' + (scaleTxt ? ' ' + scaleTxt : '');
+                // 震源が分かっていればバッジにも出す（「警報 熊本県天草・芦北地方」）
+                const nameTxt = eewState.name ? ' ' + eewState.name : '';
+                value.textContent = '警報' + nameTxt + (scaleTxt ? ' ' + scaleTxt : '');
                 value.className = 'text-rose-400 font-bold';
                 badge.title = '緊急地震速報（警報）発表中'
                     + (eewState.name ? '：' + eewState.name : '')
                     + (eewState.mag != null ? ' M' + Number(eewState.mag).toFixed(1) : '')
-                    + (eewState.serial ? '（第' + eewState.serial + '報）' : '');
+                    + (eewState.serial ? '（第' + eewState.serial + '報）' : '')
+                    + (eewState.jma && eewState.jmaTime ? '（気象庁公表 ' + eewState.jmaTime + '）' : '');
             } else if (eewState.kind === 'forecast') {
-                value.textContent = '予報';
+                const nameTxt = eewState.name ? ' ' + eewState.name : '';
+                const fScale = (eewState.scale != null && eewState.scale > 0 && SCALE_MAP[eewState.scale])
+                    ? ' 最大震度' + String(SCALE_MAP[eewState.scale].label).replace('震度', '') : '';
+                value.textContent = '予報' + nameTxt + fScale;
                 value.className = 'text-amber-300 font-bold';
                 badge.title = '緊急地震速報（予報）発表'
-                    + (eewState.name ? '：' + eewState.name : '');
+                    + (eewState.name ? '：' + eewState.name : '')
+                    + (eewState.jma && eewState.jmaTime ? '（気象庁公表 ' + eewState.jmaTime + '）' : '');
             } else {
                 value.textContent = '取消';
                 value.className = 'text-slate-400 font-bold';
                 badge.title = '緊急地震速報（警報）は取り消されました'
                     + (eewState.name ? '：' + eewState.name : '');
             }
+            renderEewAnnounceBanner();
         }
         // 1分ごとに鮮度を確認し、30分を過ぎた速報は「なし」に戻す
         setInterval(renderEewState, 60 * 1000);
@@ -4323,6 +4629,8 @@
                 scheduleJmaEewRefresh();
             } else if (code === 552) {
                 handleTsunami552(msg);
+            } else if (code === 553) {
+                handleEew553(msg);
             } else if (code === 554) {
                 handleEewDetection554(msg);
             } else if (code === 555) {
@@ -4536,11 +4844,12 @@
             applyMobileFold();
             // 気象庁の緊急地震速報 発表一覧を起動時と60分ごとに最新化（失敗しても同梱テーブルで動作）
             refreshJmaEewTable(false).then(function () { processLiveDataFromStore(false, true); });
+            // 気象庁の発表一覧は60秒ごとに取り直す（発表から1分前後で反映するため）。
+            // 失敗しても同梱テーブルで動き続ける。
             setInterval(function () {
-                // 取得した気象庁データを画面（緊急地震速報欄）へ必ず反映する
                 refreshJmaEewTable(true).then(function () { processLiveDataFromStore(false, true); });
-            }, 5 * 60 * 1000);
+            }, 60 * 1000);
         };
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a600ebb1bfb0f338',t:'MTc5NTYxMjUxMA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a600ebb1bfb0f338',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a6015e5dcc49830e',t:'MTc5NTYxNzIwNw=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a6015e5dcc49830e',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
