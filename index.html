@@ -417,6 +417,7 @@
                             <li><b>地震情報（震度速報・震源情報・各地の震度）は気象庁のXML電文を20秒ごとに直接確認</b>します（VXSE51/52/53）。P2P地震情報は有志のリレーのため、登録と配送に数十秒〜数分かかることがあり、これが「リアルタイム地震ビューアーより遅い」原因でした。</li>
                             <li>緊急地震速報のXML（VXSE43/45）が気象庁フィードに載った場合はそちらを優先し、Wolfxは保険として使います（取得できなければP2Pの556で表示）。</li>
                             <li>震度速報だけが届いて震源がまだ分からない間は、<b>前の地震の震源・M・深さを表示しない</b>ようにしました（「調査中」「震源地調査中」と表示）。</li>
+                            <li><b>緊急地震速報の表示は、地震情報が入った時刻から3分で自動的に片付けます。</b>片付ける前は帯に「▸ 地震情報が届きました（まもなく片付けます・残り2分58秒）」と残り時間を毎秒表示し、片付けたあとはバッジが「片付け済」になって10分後に「なし」へ戻ります。地震情報が先に届いていて後から速報を受けた場合も、受けた時点から3分で片付けます。<b>サイトを開いた時点で既に3分以上経っていた速報は出しません</b>（気象庁の発表一覧から復元する経路も同じ判定を通します）。地震情報が届かない発表は片付けません（従来どおり最大30分）。</li>
                             <li>v6.2：気象庁XML・P2Pの電文・気象庁の発表一覧の<b>3経路のうち、最初に届いたもの</b>を表示します。</li>
                         </ul>
                     </div>
@@ -1399,6 +1400,8 @@
             if (prevKey !== newKey && best.isNew) {
                 pushMonitorLog('【緊急地震速報（' + best.kind + '）】' + best.place + '　' + best.time + ' を発表（気象庁公表）');
             }
+            // すでに同じ地震の地震情報が届いていれば片付けタイマーを開始（3分以上前なら即片付け）
+            startClearIfQuakeInfoExists();
             renderEewState();
         }
         async function refreshJmaEewTable(quiet) {
@@ -3958,7 +3961,11 @@
                 if (nums.length >= 2) {
                     out.latitude = Number(nums[0]);
                     out.longitude = Number(nums[1]);
-                    if (nums.length >= 3) out.depth = Math.abs(Number(nums[2]));
+                    // 気象庁XMLの深さは「メートル」単位（+37.5+137.3+10000/ ＝ 10km、0＝ごく浅い）
+                    if (nums.length >= 3) {
+                        const dm = Math.abs(Number(nums[2]));
+                        out.depth = (dm === 0) ? 0 : Math.round(dm / 1000);
+                    }
                 }
             }
             const mag = (eq.match(/<(?:[A-Za-z0-9_]+:)?Magnitude[^>]*>([^<]*)</) || ['', ''])[1];
@@ -4227,6 +4234,8 @@
             }
             // 554で震源不明だった予報ログを、この地震情報の震源で補完する
             resolvePendingEewForecast(item);
+            // 緊急地震速報の片付けタイマーを開始（この地震に速報が出ていた場合）
+            noteQuakeInfoForEew(item);
         }
         function getLiveReportsArray() {
             const arr = Array.from(liveReports.values());
@@ -4969,7 +4978,12 @@
         }
         // ---------- 緊急地震速報の発表状況バッジ（モニターバー）----------
         // 画面・音での発報は行わず、状態表示のみを更新する（v1.7 方針を維持）
-        const EEW_STATE_TTL_MS = 30 * 60 * 1000;   // 30分で「なし」に戻す
+        const EEW_STATE_TTL_MS = 30 * 60 * 1000;   // 念のための上限（地震情報が来ない場合）：30分で「なし」に戻す
+        // 地震情報（551）が届いてから、緊急地震速報の表示を片付けるまでの猶予
+        let eewClearDelayMs = 3 * 60 * 1000;   // 地震情報が届いてから片付けるまで（3分）
+        let eewClearedKey = '';        // 片付け済みの発表キー
+        let eewClearNote = null;       // { key, at, label } 片付けた記録（バッジに残す）
+        const EEW_CLEAR_NOTE_MS = 10 * 60 * 1000;   // 片付け後、控えめな表示を残す時間
         function setEewState(kind, snap) {
             // 554/556 は「いつ受信したか」ではなく「いつ発生したか」を基準にする（再接続時の補完で古い電文を拾わないため）
             let at = Date.now();
@@ -5011,13 +5025,130 @@
                 };
             }
             renderEewState();
+            // 地震情報のほうが先に届いていた場合（起動直後の補完など）も、ここから3分で片付ける
+            startClearIfQuakeInfoExists();
         }
+        // すでに同じ地震の地震情報が手元にあるなら、その時点から片付けタイマーを開始する
+        function startClearIfQuakeInfoExists() {
+            if (!eewState || eewState.quakeInfoAt || eewState.kind === 'cancel') return;
+            if (eewClearedKey && eewClearedKey === eewState.key) return;
+            const arr = (typeof getLiveReportsArray === 'function') ? getLiveReportsArray() : [];
+            for (let i = 0; i < arr.length; i = i + 1) {
+                if (eewMatchesQuake(arr[i])) {
+                    // 画面を開いた時点で既にあった地震情報＝「いつ入ったか」は発表時刻で代用する
+                    noteQuakeInfoForEew(arr[i], true);
+                    return;
+                }
+            }
+        }
+        // ==========================================
+        // 緊急地震速報の片付け
+        // 地震情報（551）が届いたら、その地震の速報は役目を終える。
+        // ただしすぐ消すと「最大震度は？」が分からなくなるので、3分だけ残してから片付ける。
+        // 猶予中は帯に「まもなく片付けます（残り N秒）」を出す。
+        // ==========================================
+        function eewMatchesQuake(item) {
+            if (!eewState || eewState.kind === 'cancel') return false;
+            const eewName = String(eewState.name || '').replace(/[（(].*?[)）]/g, '');
+            const eqName = String((item && item.earthquake && item.earthquake.hypocenter && item.earthquake.hypocenter.name) || '')
+                .replace(/[（(].*?[)）]/g, '');
+            const nameHit = (eewName && eqName) ? (eewName.indexOf(eqName) !== -1 || eqName.indexOf(eewName) !== -1) : false;
+            const eqMs = item && item.earthquake && item.earthquake.time ? parseJstTime(item.earthquake.time).getTime() : NaN;
+            const eewMs = eewState && eewState.at ? eewState.at : NaN;
+            const timeHit = (!isNaN(eqMs) && !isNaN(eewMs) && Math.abs(eqMs - eewMs) <= 3 * 60 * 1000);
+            return nameHit || timeHit;
+        }
+        // item: 地震情報の電文 / preexisting: 起動時にすでに存在していた地震情報か
+        function noteQuakeInfoForEew(item, preexisting) {
+            if (!eewMatchesQuake(item)) return;
+            if (eewClearedKey && eewClearedKey === eewState.key) return;
+            if (eewState.quakeInfoAt) return;   // すでに計測中
+            // 起動時にすでにあった地震情報は「入った時刻」が分からないので発表時刻を起点にする。
+            // それでも3分以上前なら、もう片付ける（開いた瞬間に古い速報を出さない）。
+            let base = Date.now();
+            if (preexisting) {
+                const issued = parseJstTime((item.issue && item.issue.time) || (item.earthquake && item.earthquake.time) || 0).getTime();
+                if (!isNaN(issued) && issued > 0) base = issued;
+            }
+            if (preexisting && (Date.now() - base) >= eewClearDelayMs) {
+                const label0 = eewState.kind === 'warning' ? '警報' : '予報';
+                eewClearNote = { key: eewState.key, at: base, name: eewState.name || '', kind: eewState.kind, label: label0 };
+                eewClearedKey = eewState.key;
+                eewState = null;
+                pushMonitorLog('【緊急地震速報（' + label0 + '）】地震情報が届いてから3分以上経過しているため表示しません');
+                renderEewState();
+                renderEewAnnounceBanner();
+                return;
+            }
+            eewState.quakeInfoAt = base;
+            const label = eewState.kind === 'warning' ? '警報' : '予報';
+            pushMonitorLog('【緊急地震速報（' + label + '）】地震情報が届きました。'
+                + (eewClearDelayMs >= 60000 ? Math.round(eewClearDelayMs / 60000) + '分' : Math.round(eewClearDelayMs / 1000) + '秒')
+                + '後に片付けます');
+            renderEewState();
+        }
+        // 帯の残り秒数を毎秒更新する
+        function tickEewClear() {
+            if (!eewState || eewClearedKey === eewState.key) return;
+            if (!eewState.quakeInfoAt) return;
+            const left = Math.ceil((eewState.quakeInfoAt + eewClearDelayMs - Date.now()) / 1000);
+            if (left <= 0) {
+                const label = eewState.kind === 'warning' ? '警報' : '予報';
+                eewClearNote = {
+                    key: eewState.key,
+                    at: eewState.quakeInfoAt,
+                    name: eewState.name || '',
+                    kind: eewState.kind,
+                    label: label
+                };
+                eewClearedKey = eewState.key;
+                eewState = null;
+                pushMonitorLog('【緊急地震速報（' + label + '）】表示を片付けました');
+                renderEewState();
+                renderEewAnnounceBanner();
+                return;
+            }
+            const sub = document.getElementById('eewAnnounceSub');
+            if (sub && !document.getElementById('eewAnnounceBanner').classList.contains('hidden')) {
+                const base = eewBannerSubText(eewState);
+                const leftTxt = left >= 60
+                    ? Math.floor(left / 60) + '分' + String(left % 60).padStart(2, '0') + '秒'
+                    : left + '秒';
+                sub.textContent = base + '　▸ 地震情報が届きました（まもなく片付けます・残り' + leftTxt + '）';
+            }
+        }
+        setInterval(tickEewClear, 1000);
         // 画面上部の発表帯（モニターバーの小さいバッジだけでは気づきにくいため）
         let eewBannerDismissedKey = '';
         function dismissEewAnnounceBanner() {
             eewBannerDismissedKey = (eewState && eewState.key) ? eewState.key : '';
             const band = document.getElementById('eewAnnounceBanner');
             if (band) { band.classList.add('hidden'); band.classList.remove('flex'); }
+        }
+        // 帯の本文（meta＋注意書き）。残り秒数の更新でも同じ文言を使う。
+        function eewBannerSubText(st) {
+            if (!st) return '';
+            const parts = [];
+            if (st.jmaTime) parts.push(st.jmaTime + (st.jma ? '（気象庁公表）' : ''));
+            if (st.mag != null) parts.push('M' + Number(st.mag).toFixed(1));
+            if (st.kind === 'warning' && st.scale != null && st.scale > 0 && SCALE_MAP[st.scale]) {
+                parts.push('最大震度' + String(SCALE_MAP[st.scale].label).replace('震度', ''));
+            }
+            if (st.serial) parts.push('第' + st.serial + '報');
+            const meta = parts.join('　');
+            let pending = false;
+            if (st.name || st.at) {
+                const d = new Date((st.at || Date.now()) + 9 * 60 * 60 * 1000);
+                const sig = d.getUTCFullYear() + '/' + String(d.getUTCMonth() + 1).padStart(2, '0') + '/' + String(d.getUTCDate()).padStart(2, '0')
+                    + ' ' + String(d.getUTCHours()).padStart(2, '0') + ':' + String(d.getUTCMinutes()).padStart(2, '0');
+                pending = jmaIsAwaitingQuakeInfo(sig, st.name);
+            }
+            if (st.kind === 'warning') {
+                return (meta ? meta + '　強い揺れに警戒してください。' : '強い揺れに警戒してください。')
+                    + (pending ? '（地震情報の到着前のため、下の見出しは別の地震のことがあります）' : '');
+            }
+            return (meta ? meta + '　揺れが弱い予想の地震です（警報は未発表）。' : '揺れが弱い予想の地震です（警報は未発表）。')
+                + (pending ? '（地震情報の到着前のため、下の見出しは別の地震のことがあります）' : '');
         }
         function renderEewAnnounceBanner() {
             const band = document.getElementById('eewAnnounceBanner');
@@ -5038,8 +5169,7 @@
             if (eewState.serial) parts.push('第' + eewState.serial + '報');
             const meta = parts.filter(function (x) { return x; }).join('　');
             // 地震情報（551）がまだ届いていない ＝ 詳細画面の見出しが別の地震のことがある
-            // （毎回その場で判定し直す：地震情報が届いたら注意書きを消す）
-            // 毎回その場で判定し直す：同じ地震の地震情報が届いた時点で注意書きは自動的に消える
+            // （毎回その場で判定し直す：同じ地震の地震情報が届いた時点で注意書きは自動的に消える）
             let pending = false;
             if (eewState.name || eewState.at) {
                 const d = new Date((eewState.at || Date.now()) + 9 * 60 * 60 * 1000);
@@ -5054,15 +5184,13 @@
                 title.className = 'text-xs sm:text-sm font-black leading-snug text-rose-300';
                 title.textContent = '🚨 緊急地震速報（警報）が発表されました：' + name;
                 sub.className = 'text-[10px] sm:text-[11px] leading-snug mt-0.5 text-rose-200/80';
-                sub.textContent = (meta ? meta + '　強い揺れに警戒してください。' : '強い揺れに警戒してください。')
-                    + (pending ? '（地震情報の到着前のため、下の見出しは別の地震のことがあります）' : '');
+                sub.textContent = eewBannerSubText(eewState);
             } else if (eewState.kind === 'forecast') {
                 band.className = 'mb-3 bg-amber-500/15 border-amber-500/60 rounded-lg p-2.5 flex items-start gap-2.5 shadow-sm border';
                 title.className = 'text-xs sm:text-sm font-black leading-snug text-amber-300';
                 title.textContent = '⚡ 緊急地震速報（予報）が発表されました：' + name;
                 sub.className = 'text-[10px] sm:text-[11px] leading-snug mt-0.5 text-amber-200/80';
-                sub.textContent = (meta ? meta + '　揺れが弱い予想の地震です（警報は未発表）。' : '揺れが弱い予想の地震です（警報は未発表）。')
-                    + (pending ? '（地震情報の到着前のため、下の見出しは別の地震のことがあります）' : '');
+                sub.textContent = eewBannerSubText(eewState);
             } else {
                 band.className = 'mb-3 bg-slate-600/20 border-slate-500/60 rounded-lg p-2.5 flex items-start gap-2.5 shadow-sm border';
                 title.className = 'text-xs sm:text-sm font-black leading-snug text-slate-300';
@@ -5081,9 +5209,18 @@
             const basis = (eewState && eewState.jma && eewState.at) ? eewState.at : (eewState && eewState.at) || 0;
             if (!eewState || (now - basis) > EEW_STATE_TTL_MS) {
                 eewState = null;
-                value.textContent = 'なし';
-                value.className = 'text-slate-400 font-bold';
-                badge.title = '緊急地震速報（警報・予報）の発表はありません';
+                // 片付けた直後は、控えめな表示をしばらく残す（急に「なし」に戻すと見落とすため）
+                if (eewClearNote && (now - eewClearNote.at) < EEW_CLEAR_NOTE_MS) {
+                    value.textContent = '片付け済';
+                    value.className = 'text-slate-500 font-bold';
+                    badge.title = '緊急地震速報（' + eewClearNote.label + '）：'
+                        + (eewClearNote.name || '震源調査中')
+                        + '／地震情報が届いたため表示を片付けました';
+                } else {
+                    value.textContent = 'なし';
+                    value.className = 'text-slate-400 font-bold';
+                    badge.title = '緊急地震速報（警報・予報）の発表はありません';
+                }
                 renderEewAnnounceBanner();
                 return;
             }
@@ -5118,6 +5255,13 @@
         }
         // 1分ごとに鮮度を確認し、30分を過ぎた速報は「なし」に戻す
         setInterval(renderEewState, 60 * 1000);
+        // 片付け後の控えめ表示は10分で消す
+        setInterval(function () {
+            if (eewClearNote && (Date.now() - eewClearNote.at) >= EEW_CLEAR_NOTE_MS) {
+                eewClearNote = null;
+                renderEewState();
+            }
+        }, 60 * 1000);
 
         function renderTsunamiPanel() {
             const badge = document.getElementById('tsunamiLevelBadge');
@@ -5456,5 +5600,5 @@
             }, 60 * 1000);
         };
     </script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a6045c56decc1a04',t:'MTc5NTY0ODU4Mg=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a6045c56decc1a04',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a60a0607bde4d3f3',t:'MTc5NTcwNzk2MQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a60a0607bde4d3f3',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
